@@ -6,7 +6,7 @@
   "allowInherit": true,
   "layout": {
     "type": "panel",
-    "children": [
+    "fields": [
       {
         "type": "input",
         "name": "name",

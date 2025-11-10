@@ -35,3 +35,7 @@ go.work.sum
 .repomixignore
 repomix.config.json
 fritz.xml
+
+# Logs
+!logs/.gitkeep
+logs

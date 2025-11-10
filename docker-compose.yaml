@@ -1,0 +1,75 @@
+networks:
+  fritz-network:
+    driver: bridge
+
+services:
+  fritz_db:
+    image: postgres:17.5-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
+      - TZ=UTC
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    command:
+      - postgres
+      - -c
+      - max_connections=1000
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fritz-network
+
+  fritz_valkey:
+    image: valkey/valkey:8.1.1-alpine
+    container_name: fritz_valkey
+    ports:
+      - "6379:6379"
+    environment:
+      - VALKEY_PASSWORD=${VALKEY_PASSWORD}
+    command:
+      - valkey-server
+      - --appendonly
+      - "yes"
+      - --appendfsync
+      - everysec
+      - --save
+      - "900 1"
+      - --save
+      - "300 10"
+      - --save
+      - "60 10000"
+      - --maxmemory
+      - 512mb
+      - --maxmemory-policy
+      - allkeys-lru
+    healthcheck:
+      test: [ "CMD", "valkey-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - valkey_data:/data
+      - valkey_conf:/usr/local/etc/valkey
+    env_file:
+      - .env
+    networks:
+      - fritz-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  valkey_data:
+    driver: local
+  valkey_conf:
+    driver: local

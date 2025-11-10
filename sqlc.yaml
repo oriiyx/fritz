@@ -1,0 +1,12 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "database/queries"
+    schema: "cmd/migrations/migrations"
+    gen:
+      go:
+        package: "db"
+        out: "/database/generated"
+        sql_package: "pgx/v5"
+        emit_empty_slices: true
+        emit_exact_table_names: false
