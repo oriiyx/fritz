@@ -44,9 +44,10 @@ func (c *Controller) RegisterUses() {
 }
 
 func (c *Controller) RegisterRoutes() {
-
 	c.Router.Route("/api/v1", func(r chi.Router) {
 		definitionsHandler := definitions.NewDefinitionsHandler(c.Queries, c.Validator, c.Logger)
-		r.Method(http.MethodGet, "/version-check", requestlog.NewHandler(definitionsHandler.GetDataComponentTypes, c.Logger))
+		r.Route("/definitions", func(definitions chi.Router) {
+			definitions.Method(http.MethodGet, "/data-component-types", requestlog.NewHandler(definitionsHandler.GetDataComponentTypes, c.Logger))
+		})
 	})
 }
