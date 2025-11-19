@@ -12,7 +12,8 @@ import (
 	internalMiddleware "github.com/oriiyx/fritz/api/middleware"
 	"github.com/oriiyx/fritz/api/middleware/requestlog"
 	db "github.com/oriiyx/fritz/database/generated"
-	"github.com/oriiyx/fritz/server/definitions"
+	defHandler "github.com/oriiyx/fritz/server/definitions"
+	"github.com/oriiyx/fritz/server/entities"
 	"github.com/oriiyx/fritz/utils/env"
 	"github.com/rs/zerolog"
 )
@@ -45,9 +46,14 @@ func (c *Controller) RegisterUses() {
 
 func (c *Controller) RegisterRoutes() {
 	c.Router.Route("/api/v1", func(r chi.Router) {
-		definitionsHandler := definitions.NewDefinitionsHandler(c.Queries, c.Validator, c.Logger)
+		definitionsHandler := defHandler.NewDefinitionsHandler(c.Queries, c.Validator, c.Logger)
 		r.Route("/definitions", func(definitions chi.Router) {
 			definitions.Method(http.MethodGet, "/data-component-types", requestlog.NewHandler(definitionsHandler.GetDataComponentTypes, c.Logger))
+		})
+
+		entitiesHandler := entities.NewEntitiesHandler(c.Queries, c.Validator, c.Logger)
+		r.Route("/entities", func(entities chi.Router) {
+			entities.Method(http.MethodPost, "/create", requestlog.NewHandler(entitiesHandler.CreateEntity, c.Logger))
 		})
 	})
 }

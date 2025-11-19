@@ -54,6 +54,7 @@ var DataComponentRegistry = map[DataComponentType]DataComponentDefinition{
 
 func GetDataComponentDefinition(ct DataComponentType) (DataComponentDefinition, bool) {
 	def, ok := DataComponentRegistry[ct]
+
 	return def, ok
 }
 
@@ -64,6 +65,7 @@ func GetDataComponentsByCategory(cat DataComponentCategory) []DataComponentDefin
 			result = append(result, def)
 		}
 	}
+
 	return result
 }
 
@@ -72,5 +74,6 @@ func GetAllDataComponents() []DataComponentDefinition {
 	for _, def := range DataComponentRegistry {
 		result = append(result, def)
 	}
+
 	return result
 }

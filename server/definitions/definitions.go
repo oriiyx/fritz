@@ -17,15 +17,16 @@ type Handler struct {
 }
 
 func NewDefinitionsHandler(queries *db.Queries, validator *validator.Validate, logger *zerolog.Logger) *Handler {
+	loggerWithService := logger.With().Str("service", "definitions").Logger()
+
 	return &Handler{
 		queries:   queries,
 		validator: validator,
-		logger:    logger,
+		logger:    &loggerWithService,
 	}
 }
 
 // GetDataComponentTypes returns all available data component types
 func (h *Handler) GetDataComponentTypes(w http.ResponseWriter, r *http.Request) {
-	components := definitions.GetAllDataComponents()
-	_ = json.NewEncoder(w).Encode(components)
+	_ = json.NewEncoder(w).Encode(definitions.GetAllDataComponents())
 }
