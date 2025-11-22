@@ -39,3 +39,6 @@ fritz.xml
 # Logs
 !logs/.gitkeep
 logs
+
+# var
+var/entities/definitions/

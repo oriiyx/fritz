@@ -29,6 +29,10 @@ var (
 
 	RespMissingRequiredFields = []byte(`{"error": "missing required field: key_id, email, or salt"}`)
 	RespDecryptionFailed      = []byte(`{"error": "key decryption failed"}`)
+
+	RespFailedToValidateDefinitions = []byte(`{"error": "failed to validate definitions"}`)
+	RespEntityNameAlreadyExists     = []byte(`{"error": "entity name already exists"}`)
+	RespEntityIDAlreadyExists       = []byte(`{"error": "entity id already exists"}`)
 )
 
 type Error struct {

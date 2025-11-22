@@ -16,18 +16,22 @@ import (
 )
 
 type Handler struct {
+	logger    *zerolog.Logger
 	queries   *db.Queries
 	validator *validator.Validate
-	logger    *zerolog.Logger
+
+	entityBuilder *entity_builder.EntityBuilder
 }
 
 func NewEntitiesHandler(queries *db.Queries, validator *validator.Validate, logger *zerolog.Logger) *Handler {
 	loggerWithService := logger.With().Str("service", "entities").Logger()
+	entityBuilder := entity_builder.EntityBuilder{}
 
 	return &Handler{
-		queries:   queries,
-		validator: validator,
-		logger:    &loggerWithService,
+		logger:        &loggerWithService,
+		queries:       queries,
+		validator:     validator,
+		entityBuilder: &entityBuilder,
 	}
 }
 
@@ -53,8 +57,19 @@ func (h *Handler) CreateEntity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	entityBuilder := entity_builder.EntityBuilder{}
-	err := entityBuilder.StoreDefinitionIntoEntityFile(&req)
+	validation, err := h.entityBuilder.ValidateNewDefinition(&req)
+	if err != nil {
+		h.logger.Error().Err(err).Msg("Validation of definitions at create entrypoint failed")
+		errhandler.BadRequest(w, errhandler.RespFailedToValidateDefinitions)
+		return
+	}
+
+	if validation != nil {
+		errhandler.BadRequest(w, validation)
+		return
+	}
+
+	err = h.entityBuilder.StoreDefinitionIntoEntityFile(&req)
 	if err != nil {
 		h.logger.Error().Err(err).Interface("definition", req).Msg("Failed to store definitions into entity .json file")
 		return

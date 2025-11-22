@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -19,6 +20,7 @@ import (
 )
 
 type Controller struct {
+	Ctx       context.Context
 	Conf      *env.Conf
 	Pool      *pgxpool.Pool
 	Store     *sessions.CookieStore

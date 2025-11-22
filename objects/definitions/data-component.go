@@ -8,10 +8,10 @@ import (
 
 // DataComponent represents an actual configured data component instance
 type DataComponent struct {
-	Type   DataComponentType `json:"type"`
-	Name   string            `json:"name"`
-	Title  string            `json:"title"`
-	DBType DBType            `json:"dbtype"`
+	Type   DataComponentType `json:"type" validate:"required"`
+	Name   string            `json:"name" validate:"required,max=255"`
+	Title  string            `json:"title" validate:"required,max=255"`
+	DBType DBType            `json:"dbtype" validate:"required"`
 
 	// Common properties
 	Mandatory   bool `json:"mandatory"`
