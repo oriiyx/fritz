@@ -5,13 +5,13 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/oriiyx/fritz/api/common/errhandler"
-	l "github.com/oriiyx/fritz/api/common/log"
+	"github.com/oriiyx/fritz/app/core/api/common/errhandler"
+	l "github.com/oriiyx/fritz/app/core/api/common/log"
+	"github.com/oriiyx/fritz/app/core/objects/definitions"
+	"github.com/oriiyx/fritz/app/core/objects/entity_builder"
+	ctxUtil "github.com/oriiyx/fritz/app/core/utils/ctx"
+	validatorUtil "github.com/oriiyx/fritz/app/core/utils/validator"
 	db "github.com/oriiyx/fritz/database/generated"
-	"github.com/oriiyx/fritz/objects/definitions"
-	"github.com/oriiyx/fritz/objects/entity_builder"
-	ctxUtil "github.com/oriiyx/fritz/utils/ctx"
-	validatorUtil "github.com/oriiyx/fritz/utils/validator"
 	"github.com/rs/zerolog"
 )
 

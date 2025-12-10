@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/oriiyx/fritz/objects/definitions"
-	"github.com/oriiyx/fritz/utils/helpers/slug"
+	"github.com/oriiyx/fritz/app/core/objects/definitions"
+	"github.com/oriiyx/fritz/app/core/utils/helpers/slug"
 )
 
 const entitiesDefinitionsFilePathTemplate = "var/entities/definitions"

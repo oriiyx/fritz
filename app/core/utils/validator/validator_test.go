@@ -3,7 +3,7 @@ package validator_test
 import (
 	"testing"
 
-	"github.com/oriiyx/fritz/utils/validator"
+	"github.com/oriiyx/fritz/app/core/utils/validator"
 )
 
 type testCase struct {

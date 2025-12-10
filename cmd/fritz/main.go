@@ -16,9 +16,9 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
-	"github.com/oriiyx/fritz/api"
-	"github.com/oriiyx/fritz/utils/env"
-	"github.com/oriiyx/fritz/utils/logger"
+	"github.com/oriiyx/fritz/app/core/api"
+	"github.com/oriiyx/fritz/app/core/utils/env"
+	logger2 "github.com/oriiyx/fritz/app/core/utils/logger"
 )
 
 const fmtDBString = "host=%s user=%s password=%s dbname=%s port=%d sslmode=disable"
@@ -30,7 +30,7 @@ func main() {
 	}
 	conf := env.New()
 
-	l, err := logger.New(conf.Server.Debug, logFilePath)
+	l, err := logger2.New(conf.Server.Debug, logFilePath)
 	if err != nil {
 		log.Fatalf("Could not initiate logger with err: %v", err)
 	}
@@ -39,8 +39,8 @@ func main() {
 	ctx := context.Background()
 
 	l.Info().Str("env", conf.Server.ENV).Bool("debug", conf.Server.Debug).Msg("Starting application")
-	traceLogger := logger.NewTraceLogger(*l, conf.Server.Debug)
-	m := logger.MultiQueryTracer{
+	traceLogger := logger2.NewTraceLogger(*l, conf.Server.Debug)
+	m := logger2.MultiQueryTracer{
 		Tracers: []pgx.QueryTracer{
 			otelpgx.NewTracer(),
 			traceLogger,

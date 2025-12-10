@@ -13,7 +13,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
-	"github.com/oriiyx/fritz/utils/logger"
+	"github.com/oriiyx/fritz/app/core/utils/logger"
 )
 
 var logFilePath = "logs/migration-app.log"
