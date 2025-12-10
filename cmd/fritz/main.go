@@ -22,7 +22,7 @@ import (
 )
 
 const fmtDBString = "host=%s user=%s password=%s dbname=%s port=%d sslmode=disable"
-const logFilePath = "logs/app.log"
+const logFilePath = "var/logs/app.log"
 
 func main() {
 	if err := godotenv.Load(); err != nil {

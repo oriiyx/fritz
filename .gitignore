@@ -37,8 +37,8 @@ repomix.config.json
 fritz.xml
 
 # Logs
-!logs/.gitkeep
-logs
+!var/logs/.gitkeep
+var/logs
 
 # var
 var/entities/definitions/

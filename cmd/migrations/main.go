@@ -16,7 +16,7 @@ import (
 	"github.com/oriiyx/fritz/app/core/utils/logger"
 )
 
-var logFilePath = "logs/migration-app.log"
+var logFilePath = "var/logs/migration-app.log"
 
 func main() {
 	if err := godotenv.Load(); err != nil {
