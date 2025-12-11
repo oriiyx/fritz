@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/oriiyx/fritz/app/core/objects/definitions"
+	"github.com/oriiyx/fritz/app/core/services/objects/definitions"
 	db "github.com/oriiyx/fritz/database/generated"
 	"github.com/rs/zerolog"
 )

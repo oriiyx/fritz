@@ -2,10 +2,10 @@
 CREATE TABLE IF NOT EXISTS entities
 (
     id           UUID PRIMARY KEY     DEFAULT uuid_generate_v4(),
-    entity_class TEXT        NOT NULL, -- References the entity definition (e.g., 'product', 'customer')
+    entity_class TEXT        NOT NULL,                  -- References the entity definition (e.g., 'product', 'customer')
     parent_id    UUID        NULL REFERENCES entities (id) ON DELETE CASCADE,
-    o_key        TEXT        NOT NULL, -- Object key/name
-    o_path       TEXT        NOT NULL, -- Full hierarchical path (e.g., '/products/electronics/')
+    o_key        TEXT        NOT NULL,                  -- Object key/name
+    o_path       TEXT        NOT NULL,                  -- Full hierarchical path (e.g., '/products/electronics/')
     o_type       TEXT        NOT NULL DEFAULT 'object', -- Type: 'object', 'folder', 'variant'
     published    BOOLEAN     NOT NULL DEFAULT false,
     created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),

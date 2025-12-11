@@ -5,7 +5,7 @@ import (
 
 	"github.com/rs/xid"
 
-	ctxUtil "github.com/oriiyx/fritz/utils/ctx"
+	ctxUtil "github.com/oriiyx/fritz/app/core/utils/ctx"
 )
 
 const requestIDHeaderKey = "X-Request-ID"

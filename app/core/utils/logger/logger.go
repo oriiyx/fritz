@@ -6,9 +6,11 @@ import (
 	"path/filepath"
 
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/pkgerrors"
 )
 
 func New(isDebug bool, logPath string) (*zerolog.Logger, error) {
+	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	logLevel := zerolog.InfoLevel
 	if isDebug {
 		logLevel = zerolog.TraceLevel

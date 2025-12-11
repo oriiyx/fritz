@@ -6,9 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	ctxUtil "github.com/oriiyx/fritz/app/core/utils/ctx"
 	"github.com/rs/zerolog"
-
-	ctxUtil "github.com/oriiyx/fritz/utils/ctx"
 )
 
 type Handler struct {
@@ -73,11 +72,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.logger.Info().
 		Str("request_id", le.RequestID).
 		Time("received_time", le.ReceivedTime).
-		Str("method", le.RequestMethod).
-		Str("url", le.RequestURL).
+		Str("request_method", le.RequestMethod).
+		Str("request_url", le.RequestURL).
 		Int64("header_size", le.RequestHeaderSize).
 		Int64("body_size", le.RequestBodySize).
-		Str("agent", le.UserAgent).
+		Str("user_agent", le.UserAgent).
 		Str("referer", le.Referer).
 		Str("proto", le.Proto).
 		Str("remote_ip", le.RemoteIP).

@@ -15,11 +15,18 @@ type Conf struct {
 }
 
 type ConfServer struct {
-	ENV          string        `env:"APP_ENV,required"`
-	Port         int           `env:"SERVER_PORT,required"`
-	Debug        bool          `env:"SERVER_DEBUG,required"`
-	Secret       []byte        `env:"SECRET_KEY,required"`
-	SupportMail  string        `env:"SUPPORT_MAIL,required"`
+	ENV    string `env:"APP_ENV,required"`
+	Port   int    `env:"SERVER_PORT,required"`
+	Debug  bool   `env:"SERVER_DEBUG,required"`
+	Secret []byte `env:"SECRET_KEY,required"`
+
+	CORSMaxAge           *int     `env:"CORS_MAX_AGE"`
+	CORSOrigins          []string `env:"CORS_ORIGINS"`
+	CORSMethods          []string `env:"CORS_METHODS"`
+	CORSHeaders          []string `env:"CORS_HEADERS"`
+	CORSAllowCredentials *bool    `env:"CORS_ALLOW_CREDENTIALS"`
+	CORSExposedHeaders   []string `env:"CORS_EXPOSED_HEADERS"`
+
 	TimeoutIdle  time.Duration `env:"SERVER_TIMEOUT_IDLE,required"`
 	TimeoutRead  time.Duration `env:"SERVER_TIMEOUT_READ,required"`
 	TimeoutWrite time.Duration `env:"SERVER_TIMEOUT_WRITE,required"`

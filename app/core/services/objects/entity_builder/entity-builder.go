@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/oriiyx/fritz/app/core/objects/definitions"
+	"github.com/oriiyx/fritz/app/core/services/objects/definitions"
 	"github.com/oriiyx/fritz/app/core/utils/helpers/slug"
 )
 

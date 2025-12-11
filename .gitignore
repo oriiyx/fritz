@@ -42,3 +42,7 @@ var/logs
 
 # var
 var/entities/definitions/
+
+# config database
+!config/database/.gitkeep
+config/database/*
