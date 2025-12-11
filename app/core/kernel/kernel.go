@@ -102,7 +102,7 @@ func (k *Kernel) Start(ctx context.Context) error {
 		signal.Notify(sigint, os.Interrupt, syscall.SIGTERM)
 		<-sigint
 
-		l.Info().Msgf("Shutting down Kernel %v", server.Addr)
+		l.Info().Msg("Shutting down Kernel")
 		err := k.Shutdown(ctx)
 		if err != nil {
 			l.Error().Stack().Err(err).Msg("Failed to shutdown Kernel")
