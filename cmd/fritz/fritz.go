@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/exaring/otelpgx"
 	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
@@ -15,6 +17,7 @@ import (
 	"github.com/oriiyx/fritz/app/core/utils/env"
 	logger2 "github.com/oriiyx/fritz/app/core/utils/logger"
 	"github.com/oriiyx/fritz/app/core/utils/validator"
+	db "github.com/oriiyx/fritz/database/generated"
 	"github.com/rs/zerolog"
 )
 
@@ -71,6 +74,8 @@ func loadKernel(conf *env.Conf, l *zerolog.Logger, ctx context.Context) *kernel.
 	l.Info().Msg("Database connection established successfully")
 
 	chiRouter := chi.NewRouter()
+	store := createCookieStore(conf)
+	queries := db.New(pool)
 
 	k := kernel.New()
 
@@ -94,5 +99,23 @@ func loadKernel(conf *env.Conf, l *zerolog.Logger, ctx context.Context) *kernel.
 		l.Fatal().Err(err).Msg("Failed to register chi router service.")
 	}
 
+	if err = k.Registry().Register(services.CookieStore, store); err != nil {
+		l.Fatal().Err(err).Msg("Failed to register cookie store service.")
+	}
+
+	if err = k.Registry().Register(services.Queries, queries); err != nil {
+		l.Fatal().Err(err).Msg("Failed to register queries service.")
+	}
+
 	return k
+}
+
+func createCookieStore(conf *env.Conf) *sessions.CookieStore {
+	store := sessions.NewCookieStore(conf.Server.Secret)
+	store.MaxAge(conf.Auth.MaxAge)
+	store.Options.Path = "/"
+	store.Options.HttpOnly = true
+	store.Options.SameSite = http.SameSiteLaxMode
+
+	return store
 }

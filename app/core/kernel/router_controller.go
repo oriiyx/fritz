@@ -23,3 +23,21 @@ type Controller struct {
 	Queries   *db.Queries
 	Validator *validator.Validate
 }
+
+func NewController(
+	ctx context.Context, conf *env.Conf, pool *pgxpool.Pool,
+	store *sessions.CookieStore, kernel *Kernel, router *chi.Mux,
+	l *zerolog.Logger, q *db.Queries, v *validator.Validate,
+) *Controller {
+	return &Controller{
+		Ctx:       ctx,
+		Conf:      conf,
+		Pool:      pool,
+		Store:     store,
+		Kernel:    kernel,
+		Router:    router,
+		Logger:    l,
+		Queries:   q,
+		Validator: v,
+	}
+}

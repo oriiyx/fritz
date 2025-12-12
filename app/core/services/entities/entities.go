@@ -4,34 +4,25 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
+	"github.com/oriiyx/fritz/app/core/api/base"
 	"github.com/oriiyx/fritz/app/core/api/common/errhandler"
 	l "github.com/oriiyx/fritz/app/core/api/common/log"
 	"github.com/oriiyx/fritz/app/core/services/objects/definitions"
 	"github.com/oriiyx/fritz/app/core/services/objects/entity_builder"
 	ctxUtil "github.com/oriiyx/fritz/app/core/utils/ctx"
 	validatorUtil "github.com/oriiyx/fritz/app/core/utils/validator"
-	db "github.com/oriiyx/fritz/database/generated"
-	"github.com/rs/zerolog"
 )
 
 type Handler struct {
-	logger    *zerolog.Logger
-	queries   *db.Queries
-	validator *validator.Validate
+	*base.HandlerController
 
 	entityBuilder *entity_builder.EntityBuilder
 }
 
-func NewEntitiesHandler(queries *db.Queries, validator *validator.Validate, logger *zerolog.Logger) *Handler {
-	loggerWithService := logger.With().Str("service", "entities").Logger()
-	entityBuilder := entity_builder.EntityBuilder{}
-
+func NewEntitiesHandler(ctrl *base.HandlerController) *Handler {
 	return &Handler{
-		logger:        &loggerWithService,
-		queries:       queries,
-		validator:     validator,
-		entityBuilder: &entityBuilder,
+		HandlerController: ctrl,
+		entityBuilder:     &entity_builder.EntityBuilder{},
 	}
 }
 
@@ -41,15 +32,15 @@ func (h *Handler) CreateEntity(w http.ResponseWriter, r *http.Request) {
 
 	var req definitions.EntityDefinition
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.logger.Error().Err(err).Str(l.KeyReqID, reqID).Msg("Failed to decode request")
+		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Msg("Failed to decode request")
 		errhandler.BadRequest(w, errhandler.RespInvalidRequestBody)
 		return
 	}
 
-	if err := h.validator.Struct(req); err != nil {
+	if err := h.Validator.Struct(req); err != nil {
 		respBody, err := json.Marshal(validatorUtil.ToErrResponse(err))
 		if err != nil {
-			h.logger.Error().Str(l.KeyReqID, reqID).Err(err).Msg("Failed to marshal validation errors")
+			h.Logger.Error().Str(l.KeyReqID, reqID).Err(err).Msg("Failed to marshal validation errors")
 			errhandler.ServerError(w, errhandler.RespJSONEncodeFailure)
 			return
 		}
@@ -59,7 +50,7 @@ func (h *Handler) CreateEntity(w http.ResponseWriter, r *http.Request) {
 
 	validation, err := h.entityBuilder.ValidateNewDefinition(&req)
 	if err != nil {
-		h.logger.Error().Err(err).Msg("Validation of definitions at create entrypoint failed")
+		h.Logger.Error().Err(err).Msg("Validation of definitions at create entrypoint failed")
 		errhandler.BadRequest(w, errhandler.RespFailedToValidateDefinitions)
 		return
 	}
@@ -71,7 +62,7 @@ func (h *Handler) CreateEntity(w http.ResponseWriter, r *http.Request) {
 
 	err = h.entityBuilder.StoreDefinitionIntoEntityFile(&req)
 	if err != nil {
-		h.logger.Error().Err(err).Interface("definition", req).Msg("Failed to store definitions into entity .json file")
+		h.Logger.Error().Err(err).Interface("definition", req).Msg("Failed to store definitions into entity .json file")
 		return
 	}
 

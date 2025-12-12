@@ -1,10 +1,13 @@
 package services
 
+// service constants in alphabetic order
 const (
-	Router     = "router"
-	Logger     = "logger"
-	Validator  = "validator"
-	Database   = "database"
-	EnvConfig  = "env_config"
-	Controller = "controller"
+	CookieStore = "cookie_store"
+	Controller  = "controller"
+	Database    = "database"
+	EnvConfig   = "env_config"
+	Logger      = "logger"
+	Router      = "router"
+	Queries     = "queries"
+	Validator   = "validator"
 )

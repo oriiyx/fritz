@@ -4,25 +4,17 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
+	"github.com/oriiyx/fritz/app/core/api/base"
 	"github.com/oriiyx/fritz/app/core/services/objects/definitions"
-	db "github.com/oriiyx/fritz/database/generated"
-	"github.com/rs/zerolog"
 )
 
 type Handler struct {
-	queries   *db.Queries
-	validator *validator.Validate
-	logger    *zerolog.Logger
+	*base.HandlerController
 }
 
-func NewDefinitionsHandler(queries *db.Queries, validator *validator.Validate, logger *zerolog.Logger) *Handler {
-	loggerWithService := logger.With().Str("service", "definitions").Logger()
-
+func NewDefinitionsHandler(ctrl *base.HandlerController) *Handler {
 	return &Handler{
-		queries:   queries,
-		validator: validator,
-		logger:    &loggerWithService,
+		HandlerController: ctrl,
 	}
 }
 
