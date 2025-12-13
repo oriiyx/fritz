@@ -20,9 +20,11 @@ type Handler struct {
 }
 
 func NewEntitiesHandler(ctrl *base.HandlerController) *Handler {
+	eb := entity_builder.NewEntityBuilder(ctrl.Logger)
+
 	return &Handler{
 		HandlerController: ctrl,
-		entityBuilder:     &entity_builder.EntityBuilder{},
+		entityBuilder:     eb,
 	}
 }
 

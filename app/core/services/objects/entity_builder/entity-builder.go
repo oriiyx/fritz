@@ -8,11 +8,20 @@ import (
 
 	"github.com/oriiyx/fritz/app/core/services/objects/definitions"
 	"github.com/oriiyx/fritz/app/core/utils/helpers/slug"
+	"github.com/rs/zerolog"
 )
 
 const entitiesDefinitionsFilePathTemplate = "var/entities/definitions"
 
 type EntityBuilder struct {
+	logger *zerolog.Logger // Inject specific dependencies
+	// Add other needed services as fields
+}
+
+func NewEntityBuilder(logger *zerolog.Logger) *EntityBuilder {
+	return &EntityBuilder{
+		logger: logger,
+	}
 }
 
 // ValidateNewDefinition validates everything that new definition has to adhere to

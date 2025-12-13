@@ -2,12 +2,14 @@ package base
 
 import (
 	"github.com/go-playground/validator/v10"
+	"github.com/oriiyx/fritz/app/core/kernel"
 	db "github.com/oriiyx/fritz/database/generated"
 	"github.com/rs/zerolog"
 )
 
 // HandlerController provides common services for all handlers
 type HandlerController struct {
+	Hooks     *kernel.Hooks
 	Logger    *zerolog.Logger
 	Queries   *db.Queries
 	Validator *validator.Validate
@@ -15,17 +17,19 @@ type HandlerController struct {
 
 // HandlerControllerFactory creates HandlerController instances
 type HandlerControllerFactory struct {
-	baseLogger *zerolog.Logger
+	hooks      *kernel.Hooks
 	queries    *db.Queries
 	validator  *validator.Validate
+	baseLogger *zerolog.Logger
 }
 
 // NewHandlerControllerFactory creates a factory from common services
-func NewHandlerControllerFactory(logger *zerolog.Logger, queries *db.Queries, validator *validator.Validate) *HandlerControllerFactory {
+func NewHandlerControllerFactory(logger *zerolog.Logger, queries *db.Queries, validator *validator.Validate, hooks *kernel.Hooks) *HandlerControllerFactory {
 	return &HandlerControllerFactory{
-		baseLogger: logger,
+		hooks:      hooks,
 		queries:    queries,
 		validator:  validator,
+		baseLogger: logger,
 	}
 }
 
@@ -38,6 +42,7 @@ func (f *HandlerControllerFactory) Create(serviceName string) *HandlerController
 	}
 
 	return &HandlerController{
+		Hooks:     f.hooks,
 		Logger:    logger,
 		Queries:   f.queries,
 		Validator: f.validator,

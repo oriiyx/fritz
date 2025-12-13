@@ -1,4 +1,4 @@
-package kernel
+package router
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/oriiyx/fritz/app/core/kernel"
 	"github.com/oriiyx/fritz/app/core/utils/env"
 	db "github.com/oriiyx/fritz/database/generated"
 	"github.com/rs/zerolog"
@@ -17,7 +18,7 @@ type Controller struct {
 	Conf      *env.Conf
 	Pool      *pgxpool.Pool
 	Store     *sessions.CookieStore
-	Kernel    *Kernel
+	Kernel    *kernel.Kernel
 	Router    *chi.Mux
 	Logger    *zerolog.Logger
 	Queries   *db.Queries
@@ -26,7 +27,7 @@ type Controller struct {
 
 func NewController(
 	ctx context.Context, conf *env.Conf, pool *pgxpool.Pool,
-	store *sessions.CookieStore, kernel *Kernel, router *chi.Mux,
+	store *sessions.CookieStore, kernel *kernel.Kernel, router *chi.Mux,
 	l *zerolog.Logger, q *db.Queries, v *validator.Validate,
 ) *Controller {
 	return &Controller{

@@ -1,4 +1,4 @@
-package kernel
+package router
 
 import (
 	"net/http"
@@ -11,7 +11,7 @@ import (
 )
 
 func (c *Controller) RegisterRoutes() {
-	handlerFactory := base.NewHandlerControllerFactory(c.Logger, c.Queries, c.Validator)
+	handlerFactory := base.NewHandlerControllerFactory(c.Logger, c.Queries, c.Validator, c.Kernel.Hooks())
 
 	c.Router.Route("/api/v1", func(r chi.Router) {
 		definitionsHandler := defHandler.NewDefinitionsHandler(handlerFactory.Create("definitions"))
