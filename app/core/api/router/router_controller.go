@@ -9,36 +9,39 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/oriiyx/fritz/app/core/kernel"
 	"github.com/oriiyx/fritz/app/core/utils/env"
+	"github.com/oriiyx/fritz/app/core/utils/writer"
 	db "github.com/oriiyx/fritz/database/generated"
 	"github.com/rs/zerolog"
 )
 
 type Controller struct {
-	Ctx       context.Context
-	Conf      *env.Conf
-	Pool      *pgxpool.Pool
-	Store     *sessions.CookieStore
-	Kernel    *kernel.Kernel
-	Router    *chi.Mux
-	Logger    *zerolog.Logger
-	Queries   *db.Queries
-	Validator *validator.Validate
+	DB           *pgxpool.Pool
+	Ctx          context.Context
+	Conf         *env.Conf
+	Store        *sessions.CookieStore
+	Kernel       *kernel.Kernel
+	Router       *chi.Mux
+	Logger       *zerolog.Logger
+	Queries      *db.Queries
+	Validator    *validator.Validate
+	CustomWriter *writer.CustomWriter
 }
 
 func NewController(
-	ctx context.Context, conf *env.Conf, pool *pgxpool.Pool,
+	ctx context.Context, conf *env.Conf, db *pgxpool.Pool,
 	store *sessions.CookieStore, kernel *kernel.Kernel, router *chi.Mux,
-	l *zerolog.Logger, q *db.Queries, v *validator.Validate,
+	l *zerolog.Logger, q *db.Queries, v *validator.Validate, cw *writer.CustomWriter,
 ) *Controller {
 	return &Controller{
-		Ctx:       ctx,
-		Conf:      conf,
-		Pool:      pool,
-		Store:     store,
-		Kernel:    kernel,
-		Router:    router,
-		Logger:    l,
-		Queries:   q,
-		Validator: v,
+		DB:           db,
+		Ctx:          ctx,
+		Conf:         conf,
+		Store:        store,
+		Kernel:       kernel,
+		Router:       router,
+		Logger:       l,
+		Queries:      q,
+		Validator:    v,
+		CustomWriter: cw,
 	}
 }

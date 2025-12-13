@@ -2,34 +2,46 @@ package base
 
 import (
 	"github.com/go-playground/validator/v10"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/oriiyx/fritz/app/core/kernel"
+	"github.com/oriiyx/fritz/app/core/utils/writer"
 	db "github.com/oriiyx/fritz/database/generated"
 	"github.com/rs/zerolog"
 )
 
 // HandlerController provides common services for all handlers
 type HandlerController struct {
-	Hooks     *kernel.Hooks
-	Logger    *zerolog.Logger
-	Queries   *db.Queries
-	Validator *validator.Validate
+	DB           *pgxpool.Pool
+	Hooks        *kernel.Hooks
+	Logger       *zerolog.Logger
+	Queries      *db.Queries
+	Validator    *validator.Validate
+	CustomWriter *writer.CustomWriter
 }
 
 // HandlerControllerFactory creates HandlerController instances
 type HandlerControllerFactory struct {
-	hooks      *kernel.Hooks
-	queries    *db.Queries
-	validator  *validator.Validate
-	baseLogger *zerolog.Logger
+	db           *pgxpool.Pool
+	hooks        *kernel.Hooks
+	queries      *db.Queries
+	validator    *validator.Validate
+	baseLogger   *zerolog.Logger
+	customWriter *writer.CustomWriter
 }
 
 // NewHandlerControllerFactory creates a factory from common services
-func NewHandlerControllerFactory(logger *zerolog.Logger, queries *db.Queries, validator *validator.Validate, hooks *kernel.Hooks) *HandlerControllerFactory {
+func NewHandlerControllerFactory(
+	logger *zerolog.Logger, queries *db.Queries,
+	validator *validator.Validate, hooks *kernel.Hooks,
+	db *pgxpool.Pool, cw *writer.CustomWriter,
+) *HandlerControllerFactory {
 	return &HandlerControllerFactory{
-		hooks:      hooks,
-		queries:    queries,
-		validator:  validator,
-		baseLogger: logger,
+		db:           db,
+		hooks:        hooks,
+		queries:      queries,
+		validator:    validator,
+		baseLogger:   logger,
+		customWriter: cw,
 	}
 }
 
@@ -42,9 +54,11 @@ func (f *HandlerControllerFactory) Create(serviceName string) *HandlerController
 	}
 
 	return &HandlerController{
-		Hooks:     f.hooks,
-		Logger:    logger,
-		Queries:   f.queries,
-		Validator: f.validator,
+		DB:           f.db,
+		Hooks:        f.hooks,
+		Logger:       logger,
+		Queries:      f.queries,
+		Validator:    f.validator,
+		CustomWriter: f.customWriter,
 	}
 }

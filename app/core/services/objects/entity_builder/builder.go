@@ -6,20 +6,25 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/oriiyx/fritz/app/core/services/objects/definitions"
 	"github.com/oriiyx/fritz/app/core/utils/helpers/slug"
+	"github.com/oriiyx/fritz/app/core/utils/writer"
 	"github.com/rs/zerolog"
 )
 
 const entitiesDefinitionsFilePathTemplate = "var/entities/definitions"
 
 type EntityBuilder struct {
-	logger *zerolog.Logger // Inject specific dependencies
-	// Add other needed services as fields
+	db     *pgxpool.Pool
+	cw     *writer.CustomWriter
+	logger *zerolog.Logger
 }
 
-func NewEntityBuilder(logger *zerolog.Logger) *EntityBuilder {
+func NewEntityBuilder(logger *zerolog.Logger, db *pgxpool.Pool, cw *writer.CustomWriter) *EntityBuilder {
 	return &EntityBuilder{
+		db:     db,
+		cw:     cw,
 		logger: logger,
 	}
 }

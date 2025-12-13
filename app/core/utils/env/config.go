@@ -35,7 +35,6 @@ type ConfServer struct {
 type ConfDB struct {
 	Host     string `env:"DB_HOST"`
 	Port     int    `env:"DB_PORT"`
-	DBURL    string `env:"DATABASE_URL,required"`
 	Debug    bool   `env:"DB_DEBUG"`
 	DBName   string `env:"DB_NAME"`
 	Username string `env:"DB_USER"`

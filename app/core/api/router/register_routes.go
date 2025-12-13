@@ -11,7 +11,7 @@ import (
 )
 
 func (c *Controller) RegisterRoutes() {
-	handlerFactory := base.NewHandlerControllerFactory(c.Logger, c.Queries, c.Validator, c.Kernel.Hooks())
+	handlerFactory := base.NewHandlerControllerFactory(c.Logger, c.Queries, c.Validator, c.Kernel.Hooks(), c.DB, c.CustomWriter)
 
 	c.Router.Route("/api/v1", func(r chi.Router) {
 		definitionsHandler := defHandler.NewDefinitionsHandler(handlerFactory.Create("definitions"))

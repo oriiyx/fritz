@@ -46,3 +46,6 @@ var/entities/definitions/
 # config database
 !config/database/.gitkeep
 config/database/*
+
+!database/schema/.gitkeep
+database/schema

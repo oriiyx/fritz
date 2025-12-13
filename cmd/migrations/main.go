@@ -13,8 +13,11 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/oriiyx/fritz/app/core/utils/env"
 	"github.com/oriiyx/fritz/app/core/utils/logger"
 )
+
+const fmtDBString = "host=%s user=%s password=%s dbname=%s port=%d sslmode=disable"
 
 var logFilePath = "var/logs/migration-app.log"
 
@@ -29,7 +32,10 @@ func main() {
 		panic(err)
 	}
 	l.Info().Msg("Starting database migration process")
-	dbConfig, err := pgxpool.ParseConfig(os.Getenv("DATABASE_URL"))
+
+	conf := env.New()
+	dbString := fmt.Sprintf(fmtDBString, conf.DB.Host, conf.DB.Username, conf.DB.Password, conf.DB.DBName, conf.DB.Port)
+	dbConfig, err := pgxpool.ParseConfig(dbString)
 	if err != nil {
 		log.Fatal("Failed to parse database config", err)
 	}
@@ -44,7 +50,7 @@ func main() {
 	defer pool.Close()
 	l.Info().Msg("Database connection established successfully")
 
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	db, err := sql.Open("postgres", dbString)
 	if err != nil {
 		log.Fatal("Unable to connect to database ", err)
 	}
@@ -74,6 +80,7 @@ func main() {
 				Msg("Migration up failed")
 		}
 		l.Info().Msg("Migration up completed successfully")
+		l.Info().Interface("migrate", err).Msg("Migration up completed successfully")
 	}
 
 	if cmd == "down" {

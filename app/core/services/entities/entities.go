@@ -20,7 +20,7 @@ type Handler struct {
 }
 
 func NewEntitiesHandler(ctrl *base.HandlerController) *Handler {
-	eb := entity_builder.NewEntityBuilder(ctrl.Logger)
+	eb := entity_builder.NewEntityBuilder(ctrl.Logger, ctrl.DB, ctrl.CustomWriter)
 
 	return &Handler{
 		HandlerController: ctrl,
@@ -62,9 +62,17 @@ func (h *Handler) CreateEntity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = h.entityBuilder.CreateEntityTable(r.Context(), &req)
+	if err != nil {
+		h.Logger.Error().Err(err).Interface("definition", req).Msg("Failed to create entity table")
+		errhandler.ServerError(w, errhandler.RespDBDataInsertFailure)
+		return
+	}
+
 	err = h.entityBuilder.StoreDefinitionIntoEntityFile(&req)
 	if err != nil {
 		h.Logger.Error().Err(err).Interface("definition", req).Msg("Failed to store definitions into entity .json file")
+		errhandler.ServerError(w, errhandler.RespDBDataInsertFailure)
 		return
 	}
 

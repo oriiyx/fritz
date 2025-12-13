@@ -8,6 +8,20 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Entity struct {
+	ID          pgtype.UUID
+	EntityClass string
+	ParentID    pgtype.UUID
+	OKey        string
+	OPath       string
+	OType       string
+	Published   bool
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
+	CreatedBy   pgtype.UUID
+	UpdatedBy   pgtype.UUID
+}
+
 type OauthIdentity struct {
 	ID         pgtype.UUID
 	UserID     pgtype.UUID

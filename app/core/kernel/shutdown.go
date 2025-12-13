@@ -3,6 +3,9 @@ package kernel
 import (
 	"context"
 	"fmt"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/oriiyx/fritz/app/core/services"
 )
 
 // Shutdown gracefully stops all plugins
@@ -14,6 +17,9 @@ func (k *Kernel) Shutdown(ctx context.Context) error {
 			return fmt.Errorf("failed to shutdown plugin '%s': %w", plugin.Name(), err)
 		}
 	}
+
+	pool := k.Registry().MustGet(services.Database).(*pgxpool.Pool)
+	pool.Close()
 
 	return nil
 }

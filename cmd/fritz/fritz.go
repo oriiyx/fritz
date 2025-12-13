@@ -23,6 +23,7 @@ import (
 	"github.com/oriiyx/fritz/app/core/utils/env"
 	logger2 "github.com/oriiyx/fritz/app/core/utils/logger"
 	internalValidator "github.com/oriiyx/fritz/app/core/utils/validator"
+	"github.com/oriiyx/fritz/app/core/utils/writer"
 	db "github.com/oriiyx/fritz/database/generated"
 	"github.com/rs/zerolog"
 )
@@ -81,12 +82,13 @@ func loadKernel(conf *env.Conf, l *zerolog.Logger, ctx context.Context) *kernel.
 	if err != nil {
 		l.Fatal().Err(err).Msg("Failed to create database connection pool")
 	}
-	defer pool.Close()
+	// defer pool.Close()
 	l.Info().Msg("Database connection established successfully")
 
 	chiRouter := chi.NewRouter()
 	store := createCookieStore(conf)
 	queries := db.New(pool)
+	customWriter := writer.New(l)
 
 	k := kernel.New()
 
@@ -118,6 +120,10 @@ func loadKernel(conf *env.Conf, l *zerolog.Logger, ctx context.Context) *kernel.
 		l.Fatal().Err(err).Msg("Failed to register queries service.")
 	}
 
+	if err = k.Registry().Register(services.CustomWriter, customWriter); err != nil {
+		l.Fatal().Err(err).Msg("Failed to register custom writer service.")
+	}
+
 	return k
 }
 
@@ -128,9 +134,10 @@ func startApplication(ctx context.Context, k *kernel.Kernel, conf *env.Conf, l *
 	pool := k.Registry().MustGet(services.Database).(*pgxpool.Pool)
 	v := k.Registry().MustGet(services.Validator).(*validator.Validate)
 	store := k.Registry().MustGet(services.CookieStore).(*sessions.CookieStore)
+	cw := k.Registry().MustGet(services.CustomWriter).(*writer.CustomWriter)
 
 	// Create router controller
-	routerController := router.NewController(ctx, conf, pool, store, k, chiRouter, l, queries, v)
+	routerController := router.NewController(ctx, conf, pool, store, k, chiRouter, l, queries, v, cw)
 	routerController.RegisterUses()
 	routerController.RegisterRoutes()
 
