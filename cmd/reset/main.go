@@ -12,7 +12,7 @@ import (
 	"github.com/oriiyx/fritz/app/core/utils/logger"
 )
 
-var logFilePath = "logs/hard_reset.log"
+var logFilePath = "var/logs/reset.log"
 
 func main() {
 	if err := godotenv.Load(); err != nil {
