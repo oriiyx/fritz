@@ -138,3 +138,17 @@ func (e *EntityBuilder) LoadDefinitionsFromEntityFiles() ([]*definitions.EntityD
 
 	return entities, nil
 }
+
+// LoadDefinitionByID loads a specific entity definition by its ID
+func (e *EntityBuilder) LoadDefinitionByID(id string) (*definitions.EntityDefinition, error) {
+	slugName := slug.CreateSlug(id)
+	filename := fmt.Sprintf("entity_%s.json", slugName)
+	filePath := filepath.Join(entitiesDefinitionsFilePathTemplate, filename)
+
+	var definition definitions.EntityDefinition
+	if err := e.cw.ReadJSONFromFile(filePath, &definition); err != nil {
+		return nil, fmt.Errorf("failed to load definition for '%s': %w", id, err)
+	}
+
+	return &definition, nil
+}

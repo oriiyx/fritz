@@ -20,6 +20,7 @@ import (
 	"github.com/oriiyx/fritz/app/core/api/router"
 	"github.com/oriiyx/fritz/app/core/kernel"
 	"github.com/oriiyx/fritz/app/core/services"
+	"github.com/oriiyx/fritz/app/core/services/entities/adapters"
 	"github.com/oriiyx/fritz/app/core/utils/env"
 	logger2 "github.com/oriiyx/fritz/app/core/utils/logger"
 	"github.com/oriiyx/fritz/app/core/utils/rw"
@@ -89,6 +90,8 @@ func loadKernel(conf *env.Conf, l *zerolog.Logger, ctx context.Context) *kernel.
 	store := createCookieStore(conf)
 	queries := db.New(pool)
 	customWriter := rw.New(l)
+
+	adapters.LoadAll(queries)
 
 	k := kernel.New()
 

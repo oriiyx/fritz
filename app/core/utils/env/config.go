@@ -1,6 +1,7 @@
 package env
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -11,11 +12,14 @@ type Conf struct {
 	DB           ConfDB
 	Auth         ConfAuth
 	Server       ConfServer
+	GoogleAuth   ConfGoogleAuth
+	GithubAuth   ConfGithubAuth
 	IsProduction bool
 }
 
 type ConfServer struct {
 	ENV    string `env:"APP_ENV,required"`
+	URL    string `env:"APP_URL,required"`
 	Port   int    `env:"SERVER_PORT,required"`
 	Debug  bool   `env:"SERVER_DEBUG,required"`
 	Secret []byte `env:"SECRET_KEY,required"`
@@ -43,6 +47,20 @@ type ConfDB struct {
 
 type ConfAuth struct {
 	MaxAge int `env:"AUTH_MAX_AGE,required"`
+}
+
+type ConfGoogleAuth struct {
+	ID     string `env:"GOOGLE_CLIENT_ID"`
+	Secret string `env:"GOOGLE_CLIENT_SECRET"`
+}
+
+type ConfGithubAuth struct {
+	ID     string `env:"GITHUB_CLIENT_ID"`
+	Secret string `env:"GITHUB_CLIENT_SECRET"`
+}
+
+func (c *Conf) GetBaseURL() string {
+	return fmt.Sprintf("%s:%v", c.Server.URL, c.Server.Port)
 }
 
 func New() *Conf {

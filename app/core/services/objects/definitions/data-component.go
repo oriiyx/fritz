@@ -107,3 +107,41 @@ func (dc *DataComponent) ToColumnDefinition() string {
 
 	return strings.Join(parts, " ")
 }
+
+// GetGoType returns the Go type that SQLC generates based on DB type and nullability
+func (dc *DataComponent) GetGoType() string {
+	// SQLC generates string for NOT NULL text types, pgtype.Text for nullable
+	switch dc.DBType {
+	case DataTypeVarchar, DataTypeText, DataTypeChar:
+		if dc.Mandatory {
+			return "string"
+		}
+		return "pgtype.Text"
+	case DataTypeInteger:
+		return "int32"
+	case DataTypeBigInt:
+		return "int64"
+	case DataTypeSmallInt:
+		return "int16"
+	case DataTypeBoolean:
+		return "bool"
+	case DataTypeDate:
+		if dc.Mandatory {
+			return "pgtype.Date"
+		}
+		return "pgtype.Date"
+	case DataTypeTimestamp, DataTypeTimestampTZ:
+		return "pgtype.Timestamptz"
+	default:
+		return "string"
+	}
+}
+
+// GetGoTypeImport returns the import needed for this type (if any)
+func (dc *DataComponent) GetGoTypeImport() string {
+	goType := dc.GetGoType()
+	if strings.HasPrefix(goType, "pgtype.") {
+		return "github.com/jackc/pgx/v5/pgtype"
+	}
+	return ""
+}
