@@ -10,7 +10,7 @@ import (
 
 const entitiesTableSchemaFilePathTemplate = "database/schema"
 
-func (e *EntityBuilder) CreateEntityTable(ctx context.Context, definition *definitions.EntityDefinition) error {
+func (e *EntityBuilder) CreateEntityTable(ctx context.Context, definition *definitions.EntityDefinition) (string, error) {
 	tableName := fmt.Sprintf("entity_%s", definition.ID)
 
 	// Build CREATE TABLE statement from definition.Layout.Components
@@ -33,13 +33,13 @@ func (e *EntityBuilder) CreateEntityTable(ctx context.Context, definition *defin
 	_, err := e.db.Exec(ctx, sql)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = e.cw.WriteNewFile(sql, entitiesTableSchemaFilePathTemplate, fmt.Sprintf("%s.sql", tableName))
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return tableName, nil
 }

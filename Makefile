@@ -6,4 +6,7 @@ up: ## Database migration up
 down: ## Database migration down
 	@go run cmd/migrations/main.go down
 
-reset-project: down up
+reset: ## Database migration down
+	@go run cmd/reset/main.go
+
+reset-project: reset up

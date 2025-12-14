@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/oriiyx/fritz/app/core/services/objects/definitions"
 	"github.com/oriiyx/fritz/app/core/utils/helpers/slug"
-	"github.com/oriiyx/fritz/app/core/utils/writer"
+	"github.com/oriiyx/fritz/app/core/utils/rw"
 	"github.com/rs/zerolog"
 )
 
@@ -17,11 +17,11 @@ const entitiesDefinitionsFilePathTemplate = "var/entities/definitions"
 
 type EntityBuilder struct {
 	db     *pgxpool.Pool
-	cw     *writer.CustomWriter
+	cw     *rw.CustomWriter
 	logger *zerolog.Logger
 }
 
-func NewEntityBuilder(logger *zerolog.Logger, db *pgxpool.Pool, cw *writer.CustomWriter) *EntityBuilder {
+func NewEntityBuilder(logger *zerolog.Logger, db *pgxpool.Pool, cw *rw.CustomWriter) *EntityBuilder {
 	return &EntityBuilder{
 		db:     db,
 		cw:     cw,

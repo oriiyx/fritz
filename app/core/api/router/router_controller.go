@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/oriiyx/fritz/app/core/kernel"
 	"github.com/oriiyx/fritz/app/core/utils/env"
-	"github.com/oriiyx/fritz/app/core/utils/writer"
+	"github.com/oriiyx/fritz/app/core/utils/rw"
 	db "github.com/oriiyx/fritz/database/generated"
 	"github.com/rs/zerolog"
 )
@@ -24,13 +24,13 @@ type Controller struct {
 	Logger       *zerolog.Logger
 	Queries      *db.Queries
 	Validator    *validator.Validate
-	CustomWriter *writer.CustomWriter
+	CustomWriter *rw.CustomWriter
 }
 
 func NewController(
 	ctx context.Context, conf *env.Conf, db *pgxpool.Pool,
 	store *sessions.CookieStore, kernel *kernel.Kernel, router *chi.Mux,
-	l *zerolog.Logger, q *db.Queries, v *validator.Validate, cw *writer.CustomWriter,
+	l *zerolog.Logger, q *db.Queries, v *validator.Validate, cw *rw.CustomWriter,
 ) *Controller {
 	return &Controller{
 		DB:           db,

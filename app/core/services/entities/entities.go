@@ -62,9 +62,16 @@ func (h *Handler) CreateEntity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.entityBuilder.CreateEntityTable(r.Context(), &req)
+	tablename, err := h.entityBuilder.CreateEntityTable(r.Context(), &req)
 	if err != nil {
 		h.Logger.Error().Err(err).Interface("definition", req).Msg("Failed to create entity table")
+		errhandler.ServerError(w, errhandler.RespDBDataInsertFailure)
+		return
+	}
+
+	err = h.entityBuilder.CreateCrudOperations(tablename, &req)
+	if err != nil {
+		h.Logger.Error().Err(err).Interface("definition", req).Msg("Failed to create crud operations")
 		errhandler.ServerError(w, errhandler.RespDBDataInsertFailure)
 		return
 	}

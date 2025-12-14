@@ -49,3 +49,8 @@ config/database/*
 
 !database/schema/.gitkeep
 database/schema
+
+!database/fritz/.gitkeep
+database/fritz
+
+database/generated/queries_*.go

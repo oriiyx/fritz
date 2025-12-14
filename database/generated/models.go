@@ -22,6 +22,15 @@ type Entity struct {
 	UpdatedBy   pgtype.UUID
 }
 
+type EntityProduct struct {
+	ID            pgtype.UUID
+	EntityID      pgtype.UUID
+	CreatedAt     pgtype.Timestamptz
+	UpdatedAt     pgtype.Timestamptz
+	ProductName   string
+	StockQuantity int32
+}
+
 type OauthIdentity struct {
 	ID         pgtype.UUID
 	UserID     pgtype.UUID

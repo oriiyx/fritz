@@ -22,8 +22,8 @@ import (
 	"github.com/oriiyx/fritz/app/core/services"
 	"github.com/oriiyx/fritz/app/core/utils/env"
 	logger2 "github.com/oriiyx/fritz/app/core/utils/logger"
+	"github.com/oriiyx/fritz/app/core/utils/rw"
 	internalValidator "github.com/oriiyx/fritz/app/core/utils/validator"
-	"github.com/oriiyx/fritz/app/core/utils/writer"
 	db "github.com/oriiyx/fritz/database/generated"
 	"github.com/rs/zerolog"
 )
@@ -88,7 +88,7 @@ func loadKernel(conf *env.Conf, l *zerolog.Logger, ctx context.Context) *kernel.
 	chiRouter := chi.NewRouter()
 	store := createCookieStore(conf)
 	queries := db.New(pool)
-	customWriter := writer.New(l)
+	customWriter := rw.New(l)
 
 	k := kernel.New()
 
@@ -134,7 +134,7 @@ func startApplication(ctx context.Context, k *kernel.Kernel, conf *env.Conf, l *
 	pool := k.Registry().MustGet(services.Database).(*pgxpool.Pool)
 	v := k.Registry().MustGet(services.Validator).(*validator.Validate)
 	store := k.Registry().MustGet(services.CookieStore).(*sessions.CookieStore)
-	cw := k.Registry().MustGet(services.CustomWriter).(*writer.CustomWriter)
+	cw := k.Registry().MustGet(services.CustomWriter).(*rw.CustomWriter)
 
 	// Create router controller
 	routerController := router.NewController(ctx, conf, pool, store, k, chiRouter, l, queries, v, cw)

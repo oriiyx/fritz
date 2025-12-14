@@ -4,7 +4,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/oriiyx/fritz/app/core/kernel"
-	"github.com/oriiyx/fritz/app/core/utils/writer"
+	"github.com/oriiyx/fritz/app/core/utils/rw"
 	db "github.com/oriiyx/fritz/database/generated"
 	"github.com/rs/zerolog"
 )
@@ -16,7 +16,7 @@ type HandlerController struct {
 	Logger       *zerolog.Logger
 	Queries      *db.Queries
 	Validator    *validator.Validate
-	CustomWriter *writer.CustomWriter
+	CustomWriter *rw.CustomWriter
 }
 
 // HandlerControllerFactory creates HandlerController instances
@@ -26,14 +26,14 @@ type HandlerControllerFactory struct {
 	queries      *db.Queries
 	validator    *validator.Validate
 	baseLogger   *zerolog.Logger
-	customWriter *writer.CustomWriter
+	customWriter *rw.CustomWriter
 }
 
 // NewHandlerControllerFactory creates a factory from common services
 func NewHandlerControllerFactory(
 	logger *zerolog.Logger, queries *db.Queries,
 	validator *validator.Validate, hooks *kernel.Hooks,
-	db *pgxpool.Pool, cw *writer.CustomWriter,
+	db *pgxpool.Pool, cw *rw.CustomWriter,
 ) *HandlerControllerFactory {
 	return &HandlerControllerFactory{
 		db:           db,

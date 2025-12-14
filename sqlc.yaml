@@ -1,14 +1,16 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    queries: "database/queries"
+    queries:
+      - "database/queries"
+      - "database/fritz"
     schema:
       - "cmd/migrations/migrations"
       - "database/schema"
     gen:
       go:
         package: "db"
-        out: "/database/generated"
+        out: "database/generated"
         sql_package: "pgx/v5"
         emit_empty_slices: true
         emit_exact_table_names: false
