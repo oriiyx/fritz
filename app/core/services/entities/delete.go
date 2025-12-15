@@ -12,7 +12,7 @@ import (
 )
 
 type DeleteEntityRequest struct {
-	ID string `json:"id,required"`
+	ID string `json:"id" validate:"required"`
 }
 
 // DeleteEntity is an endpoint that handles deleting entity

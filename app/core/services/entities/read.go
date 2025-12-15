@@ -14,7 +14,7 @@ import (
 )
 
 type ReadEntityRequest struct {
-	ID string `json:"id,required"`
+	ID string `json:"id" validate:"required"`
 }
 
 // ReadEntity is an endpoint that handles reading entity
@@ -57,7 +57,7 @@ func (h *Handler) ReadEntity(w http.ResponseWriter, r *http.Request) {
 
 	entity, err := h.Queries.GetEntityByID(r.Context(), entityID)
 	if err != nil {
-		h.Logger.Error().Err(err).Msg("Failed to update entity record")
+		h.Logger.Error().Err(err).Msg("Failed to read entity record")
 		errhandler.ServerError(w, errhandler.RespDBDataInsertFailure)
 		return
 	}
@@ -65,7 +65,7 @@ func (h *Handler) ReadEntity(w http.ResponseWriter, r *http.Request) {
 	// Create the entity data using the adapter
 	result, err := adapter.Read(r.Context(), entity.ID)
 	if err != nil {
-		h.Logger.Error().Err(err).Msg("Failed to update entity data")
+		h.Logger.Error().Err(err).Msg("Failed to read entity data")
 		// Rollback: delete the entity record
 		// TODO: Consider using transactions
 		errhandler.ServerError(w, errhandler.RespDBDataInsertFailure)

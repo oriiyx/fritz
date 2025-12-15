@@ -15,7 +15,7 @@ import (
 )
 
 type UpdateEntityRequest struct {
-	ID        string                 `json:"id,required"`
+	ID        string                 `json:"id" validate:"required"`
 	ParentID  *string                `json:"parent_id,omitempty"`
 	Key       string                 `json:"key" validate:"required,max=255"`
 	Path      string                 `json:"path" validate:"required"`
