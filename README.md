@@ -28,4 +28,4 @@ Inspired by Pimcore's flexible data modeling while embracing Go's philosophy of 
 
 ---
 
-**Built with ❤️ in Go**
+**Built with 🛠️️in Go**
