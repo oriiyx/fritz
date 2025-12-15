@@ -10,10 +10,11 @@ import (
 	l "github.com/oriiyx/fritz/app/core/api/common/log"
 	"github.com/oriiyx/fritz/app/core/services/entities/adapters"
 	ctxUtil "github.com/oriiyx/fritz/app/core/utils/ctx"
+	validatorUtil "github.com/oriiyx/fritz/app/core/utils/validator"
 	db "github.com/oriiyx/fritz/database/generated"
 )
 
-type InsertEntityRequest struct {
+type CreateEntityRequest struct {
 	ParentID  *string                `json:"parent_id,omitempty"`
 	Key       string                 `json:"key" validate:"required,max=255"`
 	Path      string                 `json:"path" validate:"required"`
@@ -22,12 +23,12 @@ type InsertEntityRequest struct {
 	Data      map[string]interface{} `json:"data" validate:"required"`
 }
 
-// InsertEntity creates a new entity instance
-func (h *Handler) InsertEntity(w http.ResponseWriter, r *http.Request) {
+// CreateEntity creates a new entity instance
+func (h *Handler) CreateEntity(w http.ResponseWriter, r *http.Request) {
 	reqID := ctxUtil.RequestID(r.Context())
 	classID := chi.URLParam(r, ClassIDKey)
 
-	var req InsertEntityRequest
+	var req CreateEntityRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Msg("Failed to decode request")
 		errhandler.BadRequest(w, errhandler.RespInvalidRequestBody)
@@ -36,8 +37,13 @@ func (h *Handler) InsertEntity(w http.ResponseWriter, r *http.Request) {
 
 	// Validate request
 	if err := h.Validator.Struct(req); err != nil {
-		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Msg("Validation failed")
-		errhandler.BadRequest(w, errhandler.RespInvalidRequestBody)
+		respBody, err := json.Marshal(validatorUtil.ToErrResponse(err))
+		if err != nil {
+			h.Logger.Error().Str(l.KeyReqID, reqID).Err(err).Msg("Failed to marshal validation errors")
+			errhandler.ServerError(w, errhandler.RespJSONEncodeFailure)
+			return
+		}
+		errhandler.ValidationErrors(w, respBody)
 		return
 	}
 

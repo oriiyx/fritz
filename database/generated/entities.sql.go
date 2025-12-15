@@ -64,6 +64,18 @@ func (q *Queries) CreateEntity(ctx context.Context, arg CreateEntityParams) (Ent
 	return i, err
 }
 
+const deleteEntity = `-- name: DeleteEntity :exec
+DELETE
+FROM entities
+WHERE id = $1
+`
+
+// noinspection SqlResolve
+func (q *Queries) DeleteEntity(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteEntity, id)
+	return err
+}
+
 const getEntityByID = `-- name: GetEntityByID :one
 SELECT id, entity_class, parent_id, o_key, o_path, o_type, published, created_at, updated_at, created_by, updated_by
 FROM entities
@@ -105,6 +117,53 @@ type GetEntityByPathParams struct {
 // noinspection SqlResolve
 func (q *Queries) GetEntityByPath(ctx context.Context, arg GetEntityByPathParams) (Entity, error) {
 	row := q.db.QueryRow(ctx, getEntityByPath, arg.OPath, arg.OKey)
+	var i Entity
+	err := row.Scan(
+		&i.ID,
+		&i.EntityClass,
+		&i.ParentID,
+		&i.OKey,
+		&i.OPath,
+		&i.OType,
+		&i.Published,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.CreatedBy,
+		&i.UpdatedBy,
+	)
+	return i, err
+}
+
+const updateEntity = `-- name: UpdateEntity :one
+UPDATE entities
+SET parent_id  = $1,
+    o_key      = $2,
+    o_path     = $3,
+    published  = $4,
+    updated_by = $5
+WHERE id = $6
+RETURNING id, entity_class, parent_id, o_key, o_path, o_type, published, created_at, updated_at, created_by, updated_by
+`
+
+type UpdateEntityParams struct {
+	ParentID  pgtype.UUID
+	OKey      string
+	OPath     string
+	Published bool
+	UpdatedBy pgtype.UUID
+	ID        pgtype.UUID
+}
+
+// noinspection SqlResolve
+func (q *Queries) UpdateEntity(ctx context.Context, arg UpdateEntityParams) (Entity, error) {
+	row := q.db.QueryRow(ctx, updateEntity,
+		arg.ParentID,
+		arg.OKey,
+		arg.OPath,
+		arg.Published,
+		arg.UpdatedBy,
+		arg.ID,
+	)
 	var i Entity
 	err := row.Scan(
 		&i.ID,

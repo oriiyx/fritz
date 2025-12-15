@@ -54,7 +54,7 @@ func BadRequest(w http.ResponseWriter, error []byte) {
 }
 
 func ValidationErrors(w http.ResponseWriter, resp []byte) {
-	w.WriteHeader(http.StatusUnprocessableEntity)
+	w.WriteHeader(http.StatusBadRequest)
 	_, _ = w.Write(resp)
 }
 

@@ -88,7 +88,7 @@ func (e *EntityBuilder) CreateCrudOperations(tablename string, d *definitions.En
 }
 
 func (e *EntityBuilder) updateAdapterLoader(d *definitions.EntityDefinition) error {
-	definitions, err := e.LoadDefinitionsFromEntityFiles()
+	entityDefinitions, err := e.LoadDefinitionsFromEntityFiles()
 	if err != nil {
 		return err
 	}
@@ -102,7 +102,7 @@ func (e *EntityBuilder) updateAdapterLoader(d *definitions.EntityDefinition) err
 	code.WriteString("// LoadAll registers all entity adapters\n")
 	code.WriteString("func LoadAll(queries *db.Queries) {\n")
 
-	for _, def := range definitions {
+	for _, def := range entityDefinitions {
 		code.WriteString(fmt.Sprintf("\tRegister(\"%s\", New%sAdapter(queries))\n", def.ID, def.Name))
 	}
 
@@ -164,7 +164,7 @@ func (e *EntityBuilder) genEdit(tablename string, d *definitions.EntityDefinitio
 	idParam := paramIndex
 
 	sqlStatement := fmt.Sprintf(
-		"UPDATE %s\nSET %s\nWHERE id = $%d\nRETURNING *;",
+		"UPDATE %s\nSET %s\nWHERE entity_id = $%d\nRETURNING *;",
 		tablename,
 		strings.Join(setClauses, ", "),
 		idParam,
@@ -177,7 +177,7 @@ func (e *EntityBuilder) genEdit(tablename string, d *definitions.EntityDefinitio
 func (e *EntityBuilder) genRead(tablename string, d *definitions.EntityDefinition) (string, error) {
 	queryName := fmt.Sprintf("Get%sByID", d.Name)
 	sqlcStatement := fmt.Sprintf("-- name: %s :one", queryName)
-	sqlStatement := fmt.Sprintf("SELECT * FROM %s WHERE id = $1;", tablename)
+	sqlStatement := fmt.Sprintf("SELECT * FROM %s WHERE entity_id = $1;", tablename)
 
 	sql := strings.Join([]string{sqlcStatement, sqlStatement}, "\n")
 	return sql, nil
@@ -186,7 +186,7 @@ func (e *EntityBuilder) genRead(tablename string, d *definitions.EntityDefinitio
 func (e *EntityBuilder) genDelete(tablename string, d *definitions.EntityDefinition) (string, error) {
 	queryName := fmt.Sprintf("Delete%s", d.Name)
 	sqlcStatement := fmt.Sprintf("-- name: %s :exec", queryName)
-	sqlStatement := fmt.Sprintf("DELETE FROM %s WHERE id = $1;", tablename)
+	sqlStatement := fmt.Sprintf("DELETE FROM %s WHERE entity_id = $1;", tablename)
 
 	sql := strings.Join([]string{sqlcStatement, sqlStatement}, "\n")
 	return sql, nil
@@ -206,11 +206,6 @@ func (e *EntityBuilder) genAdapterCode(d *definitions.EntityDefinition) string {
 		// "encoding/json": false,
 	}
 
-	// for _, comp := range d.Layout.Components {
-	// 	if imp := comp.GetGoTypeImport(); imp != "" {
-	// 		imports[imp] = true
-	// 	}
-	// }
 	imports["github.com/jackc/pgx/v5/pgtype"] = true
 	imports["github.com/oriiyx/fritz/database/generated"] = true
 
@@ -344,7 +339,7 @@ func (e *EntityBuilder) genAdapterUpdate(d *definitions.EntityDefinition) string
 	code.WriteString("\t}\n\n")
 
 	code.WriteString(fmt.Sprintf("\tparams := db.Update%sParams{\n", entityName))
-	code.WriteString("\t\tID: uid,\n")
+	code.WriteString("\t\tEntityID: uid,\n")
 
 	for _, comp := range d.Layout.Components {
 		fieldName := toPascalCase(comp.Name)

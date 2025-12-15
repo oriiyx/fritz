@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/oriiyx/fritz/app/core/api/common/errhandler"
 	l "github.com/oriiyx/fritz/app/core/api/common/log"
 	"github.com/oriiyx/fritz/app/core/services/objects/definitions"
@@ -11,10 +12,13 @@ import (
 	validatorUtil "github.com/oriiyx/fritz/app/core/utils/validator"
 )
 
+type DeleteEntityRequest struct {
+	ID string `json:"id,required"`
+}
+
 // DeleteEntity is an endpoint that handles deleting entity
 func (h *Handler) DeleteEntity(w http.ResponseWriter, r *http.Request) {
 	reqID := ctxUtil.RequestID(r.Context())
-	// classID := chi.URLParam(r, ClassIDKey)
 
 	var req definitions.EntityDefinition
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -34,15 +38,17 @@ func (h *Handler) DeleteEntity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	validation, err := h.entityBuilder.ValidateNewDefinition(&req)
-	if err != nil {
-		h.Logger.Error().Err(err).Msg("Validation of definitions at create entrypoint failed")
-		errhandler.BadRequest(w, errhandler.RespFailedToValidateDefinitions)
+	var entityID pgtype.UUID
+	if err := entityID.Scan(req.ID); err != nil {
+		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Msg("Invalid entity id")
+		errhandler.BadRequest(w, []byte(`{"error": "invalid entity id"}`))
 		return
 	}
 
-	if validation != nil {
-		errhandler.BadRequest(w, validation)
+	err := h.Queries.DeleteEntity(r.Context(), entityID)
+	if err != nil {
+		h.Logger.Error().Err(err).Msg("Failed to delete entity record")
+		errhandler.ServerError(w, errhandler.RespDBDataInsertFailure)
 		return
 	}
 
