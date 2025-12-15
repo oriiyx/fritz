@@ -7,7 +7,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/oriiyx/fritz/app/core/api/common/errhandler"
 	l "github.com/oriiyx/fritz/app/core/api/common/log"
-	"github.com/oriiyx/fritz/app/core/services/objects/definitions"
 	ctxUtil "github.com/oriiyx/fritz/app/core/utils/ctx"
 	validatorUtil "github.com/oriiyx/fritz/app/core/utils/validator"
 )
@@ -20,7 +19,7 @@ type DeleteEntityRequest struct {
 func (h *Handler) DeleteEntity(w http.ResponseWriter, r *http.Request) {
 	reqID := ctxUtil.RequestID(r.Context())
 
-	var req definitions.EntityDefinition
+	var req DeleteEntityRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Msg("Failed to decode request")
 		errhandler.BadRequest(w, errhandler.RespInvalidRequestBody)

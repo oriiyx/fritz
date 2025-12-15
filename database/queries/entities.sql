@@ -18,7 +18,8 @@ SET parent_id  = $1,
     o_key      = $2,
     o_path     = $3,
     published  = $4,
-    updated_by = $5
+    updated_by = $5,
+    updated_at = NOW()
 WHERE id = $6
 RETURNING *;
 
