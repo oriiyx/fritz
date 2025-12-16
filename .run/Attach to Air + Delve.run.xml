@@ -1,6 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Attach to Air + Delve" type="GoRemoteDebugConfigurationType" factoryName="Go Remote">
-    <option name="disconnectOption" value="ASK" />
-    <method v="2" />
-  </configuration>
+    <configuration default="false" name="Attach to Air + Delve" type="GoRemoteDebugConfigurationType"
+                   factoryName="Go Remote">
+        <option name="disconnectOption" value="ASK"/>
+        <method v="2"/>
+    </configuration>
 </component>

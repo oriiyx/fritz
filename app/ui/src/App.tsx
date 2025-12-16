@@ -1,8 +1,22 @@
+import {RouterProvider} from '@tanstack/react-router'
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
+import {router} from './router'
+
+// Create a client
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            staleTime: 60 * 1000, // 1 minute
+            refetchOnWindowFocus: false,
+        },
+    },
+})
+
 function App() {
     return (
-        <>
-            <h1 className="text-5xl">Fritz</h1>
-        </>
+        <QueryClientProvider client={queryClient}>
+            <RouterProvider router={router}/>
+        </QueryClientProvider>
     )
 }
 
