@@ -42,11 +42,21 @@ type OauthIdentity struct {
 	LastUsedAt pgtype.Timestamptz
 }
 
+type Session struct {
+	ID             pgtype.UUID
+	UserIdentityID pgtype.UUID
+	DeviceID       string
+	IsActive       bool
+	CreatedAt      pgtype.Timestamptz
+	ExpiresAt      pgtype.Timestamptz
+	LastActivityAt pgtype.Timestamptz
+}
+
 type User struct {
 	ID        pgtype.UUID
-	Email     pgtype.Text
+	Email     string
+	Password  string
 	FullName  pgtype.Text
-	AvatarUrl pgtype.Text
 	CreatedAt pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz
 }

@@ -6,7 +6,7 @@ import {authApi} from '../services/authService'
 
 export function RootLayout() {
     const navigate = useNavigate()
-    const {isAuthenticated, setUser, setLoading} = useAuthStore()
+    const {setUser} = useAuthStore()
     const routerState = useRouterState()
     const currentPath = routerState.location.pathname
 
@@ -14,7 +14,9 @@ export function RootLayout() {
     const {data: user, isLoading} = useQuery({
         queryKey: ['auth-check'],
         queryFn: authApi.checkAuth,
-        retry: false,
+        retry: false, // Don't retry on 401 - it's expected when not logged in
+        retryOnMount: false, // Don't retry when component remounts
+        refetchOnWindowFocus: false, // Don't refetch when window regains focus
         staleTime: 5 * 60 * 1000, // 5 minutes
     })
 
@@ -24,9 +26,9 @@ export function RootLayout() {
 
             // Redirect logic
             if (user && currentPath === '/login') {
-                navigate({to: '/'})
+                navigate({to: '/'}).then()
             } else if (!user && currentPath !== '/login') {
-                navigate({to: '/login'})
+                navigate({to: '/login'}).then()
             }
         }
     }, [user, isLoading, currentPath, setUser, navigate])

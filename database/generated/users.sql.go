@@ -49,26 +49,25 @@ func (q *Queries) CreateOAuthIdentity(ctx context.Context, arg CreateOAuthIdenti
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (email, full_name, avatar_url)
-VALUES ($1, $2, $3)
-RETURNING id, email, full_name, avatar_url, created_at, updated_at
+INSERT INTO users (email, password)
+VALUES ($1, hash_password($2))
+RETURNING id, email, password, full_name, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	Email     pgtype.Text
-	FullName  pgtype.Text
-	AvatarUrl pgtype.Text
+	Email    string
+	Password string
 }
 
 // noinspection SqlResolve
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.Email, arg.FullName, arg.AvatarUrl)
+	row := q.db.QueryRow(ctx, createUser, arg.Email, arg.Password)
 	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
+		&i.Password,
 		&i.FullName,
-		&i.AvatarUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -105,22 +104,62 @@ func (q *Queries) GetOAuthIdentityByProviderAndToken(ctx context.Context, arg Ge
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, full_name, avatar_url, created_at, updated_at
+SELECT id, email, password, full_name, created_at, updated_at
 FROM users
 WHERE email = $1
 `
 
 // noinspection SqlResolve
-func (q *Queries) GetUserByEmail(ctx context.Context, email pgtype.Text) (User, error) {
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
+		&i.Password,
 		&i.FullName,
-		&i.AvatarUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getUserByID = `-- name: GetUserByID :one
+SELECT id, email, password, full_name, created_at, updated_at
+FROM users
+WHERE id = $1
+`
+
+// noinspection SqlResolve
+func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByID, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Password,
+		&i.FullName,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const verifyPassword = `-- name: VerifyPassword :one
+SELECT verify_password($1, password)
+FROM users
+WHERE email = $2
+`
+
+type VerifyPasswordParams struct {
+	Password string
+	Email    string
+}
+
+// noinspection SqlResolve
+func (q *Queries) VerifyPassword(ctx context.Context, arg VerifyPasswordParams) (bool, error) {
+	row := q.db.QueryRow(ctx, verifyPassword, arg.Password, arg.Email)
+	var verify_password bool
+	err := row.Scan(&verify_password)
+	return verify_password, err
 }

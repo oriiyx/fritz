@@ -10,12 +10,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/sessions"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/google"
+	"github.com/oriiyx/fritz/app/core/services/session"
 	services "github.com/oriiyx/fritz/app/core/services/user"
 	"github.com/oriiyx/fritz/app/core/utils/env"
 	db "github.com/oriiyx/fritz/database/generated"
@@ -23,14 +23,15 @@ import (
 )
 
 type API struct {
-	Pool        *pgxpool.Pool
-	Goth        *goth.Session
-	Store       *sessions.CookieStore
-	Logger      *zerolog.Logger
-	EnvConf     *env.Conf
-	Queries     *db.Queries
-	Validator   *validator.Validate
-	UserService *services.UserService
+	DB             *pgxpool.Pool
+	Goth           *goth.Session
+	Store          *sessions.CookieStore
+	Logger         *zerolog.Logger
+	EnvConf        *env.Conf
+	Queries        *db.Queries
+	Validator      *validator.Validate
+	UserService    *services.UserService
+	SessionManager *session.Manager
 }
 
 // Define a custom type for context keys to avoid collisions
@@ -46,7 +47,7 @@ const (
 	providerContextKey contextKey = "provider"
 )
 
-func NewAuth(logger *zerolog.Logger, validator *validator.Validate, cfg *env.Conf, pool *pgxpool.Pool, store *sessions.CookieStore) *API {
+func NewAuth(logger *zerolog.Logger, validator *validator.Validate, cfg *env.Conf, pool *pgxpool.Pool, store *sessions.CookieStore, queries *db.Queries) *API {
 	gothic.Store = store
 	goth.UseProviders(
 		google.New(cfg.GoogleAuth.ID, cfg.GoogleAuth.Secret, fmt.Sprintf("%s/auth/google/callback", cfg.GetBaseURL()), "email", "profile"),
@@ -54,17 +55,18 @@ func NewAuth(logger *zerolog.Logger, validator *validator.Validate, cfg *env.Con
 	)
 
 	return &API{
-		Pool:        pool,
-		Store:       store,
-		Logger:      logger,
-		EnvConf:     cfg,
-		Queries:     db.New(pool),
-		Validator:   validator,
-		UserService: services.NewUserService(pool),
+		DB:             pool,
+		Store:          store,
+		Logger:         logger,
+		EnvConf:        cfg,
+		Queries:        db.New(pool),
+		Validator:      validator,
+		UserService:    services.NewUserService(pool),
+		SessionManager: session.NewManager(cfg, queries, logger),
 	}
 }
 
-func (a *API) Login(w http.ResponseWriter, r *http.Request) {
+func (a *API) ProviderLogin(w http.ResponseWriter, r *http.Request) {
 	provider := chi.URLParam(r, ProviderKey)
 	r = r.WithContext(context.WithValue(r.Context(), providerContextKey, provider))
 
@@ -78,10 +80,7 @@ func (a *API) Login(w http.ResponseWriter, r *http.Request) {
 	// try to get the user without re-authenticating
 	if user, err := gothic.CompleteUserAuth(w, r); err == nil {
 		a.Logger.Info().Interface("user", user).Msg("Got user information")
-		dbUser, err := a.Queries.GetUserByEmail(r.Context(), pgtype.Text{
-			String: user.Email,
-			Valid:  true,
-		})
+		dbUser, err := a.Queries.GetUserByEmail(r.Context(), user.Email)
 		if err != nil {
 			a.Logger.Err(err).Str("email", user.Email).Msg("Could not find user by email")
 			http.Redirect(w, r, a.EnvConf.GetBaseURL(), http.StatusInternalServerError)
@@ -103,7 +102,7 @@ func (a *API) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *API) Logout(w http.ResponseWriter, r *http.Request) {
+func (a *API) ProviderLogout(w http.ResponseWriter, r *http.Request) {
 	provider := chi.URLParam(r, ProviderKey)
 	r = r.WithContext(context.WithValue(r.Context(), providerContextKey, provider))
 
@@ -127,7 +126,7 @@ func (a *API) Logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, a.EnvConf.GetBaseURL(), http.StatusFound)
 }
 
-func (a *API) Callback(w http.ResponseWriter, r *http.Request) {
+func (a *API) ProviderCallback(w http.ResponseWriter, r *http.Request) {
 	provider := chi.URLParam(r, ProviderKey)
 	r = r.WithContext(context.WithValue(r.Context(), providerContextKey, provider))
 
@@ -143,27 +142,27 @@ func (a *API) Callback(w http.ResponseWriter, r *http.Request) {
 	hasher.Write([]byte(user.IDToken))
 	req.IDToken = []byte(hex.EncodeToString(hasher.Sum(nil)))
 
-	userWithOAuth, err := a.UserService.CreateUserWithOAuth(r.Context(), req)
-	if err != nil {
-		a.Logger.Err(err).Msg("Failed to create user with OAuth")
-		http.Error(w, "Failed to create user", http.StatusInternalServerError)
-		return
-	}
-
-	a.Logger.Info().
-		Interface("user", userWithOAuth.User).
-		Interface("oauth", userWithOAuth.OAuthIdentity).
-		Msg("User created/updated successfully")
-
-	session, _ := a.Store.Get(r, SessionID)
-	session.Values[AuthenticatedKey] = true
-	session.Values[UserIDKey] = userWithOAuth.User.ID.String()
-	err = session.Save(r, w)
-	if err != nil {
-		a.Logger.Err(err).Msg("Could not save session")
-		http.Error(w, "Session error", http.StatusInternalServerError)
-		return
-	}
+	// userWithOAuth, err := a.UserService.CreateUserWithOAuth(r.Context(), req)
+	// if err != nil {
+	// 	a.Logger.Err(err).Msg("Failed to create user with OAuth")
+	// 	http.Error(w, "Failed to create user", http.StatusInternalServerError)
+	// 	return
+	// }
+	//
+	// a.Logger.Info().
+	// 	Interface("user", userWithOAuth.User).
+	// 	Interface("oauth", userWithOAuth.OAuthIdentity).
+	// 	Msg("User created/updated successfully")
+	//
+	// session, _ := a.Store.Get(r, SessionID)
+	// session.Values[AuthenticatedKey] = true
+	// session.Values[UserIDKey] = userWithOAuth.User.ID.String()
+	// err = session.Save(r, w)
+	// if err != nil {
+	// 	a.Logger.Err(err).Msg("Could not save session")
+	// 	http.Error(w, "Session error", http.StatusInternalServerError)
+	// 	return
+	// }
 
 	http.Redirect(w, r, a.EnvConf.GetBaseURL(), http.StatusFound)
 }

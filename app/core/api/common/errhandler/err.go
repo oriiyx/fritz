@@ -27,6 +27,8 @@ var (
 	RespUnauthorized                  = []byte(`{"error": "unauthorized"}`)
 	RespRestrictedAccess              = []byte(`{"error": "restricted access"}`)
 
+	RespUserEmailAlreadyExists = []byte(`{"error": ""user with your email already exists""}`)
+
 	RespMissingRequiredFields = []byte(`{"error": "missing required field: key_id, email, or salt"}`)
 	RespDecryptionFailed      = []byte(`{"error": "key decryption failed"}`)
 

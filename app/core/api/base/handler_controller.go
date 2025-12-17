@@ -4,6 +4,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/oriiyx/fritz/app/core/kernel"
+	"github.com/oriiyx/fritz/app/core/utils/env"
 	"github.com/oriiyx/fritz/app/core/utils/rw"
 	db "github.com/oriiyx/fritz/database/generated"
 	"github.com/rs/zerolog"
@@ -12,6 +13,7 @@ import (
 // HandlerController provides common services for all handlers
 type HandlerController struct {
 	DB           *pgxpool.Pool
+	Conf         *env.Conf
 	Hooks        *kernel.Hooks
 	Logger       *zerolog.Logger
 	Queries      *db.Queries
@@ -22,6 +24,7 @@ type HandlerController struct {
 // HandlerControllerFactory creates HandlerController instances
 type HandlerControllerFactory struct {
 	db           *pgxpool.Pool
+	conf         *env.Conf
 	hooks        *kernel.Hooks
 	queries      *db.Queries
 	validator    *validator.Validate
@@ -33,10 +36,11 @@ type HandlerControllerFactory struct {
 func NewHandlerControllerFactory(
 	logger *zerolog.Logger, queries *db.Queries,
 	validator *validator.Validate, hooks *kernel.Hooks,
-	db *pgxpool.Pool, cw *rw.CustomWriter,
+	db *pgxpool.Pool, cw *rw.CustomWriter, cfg *env.Conf,
 ) *HandlerControllerFactory {
 	return &HandlerControllerFactory{
 		db:           db,
+		conf:         cfg,
 		hooks:        hooks,
 		queries:      queries,
 		validator:    validator,
@@ -55,6 +59,7 @@ func (f *HandlerControllerFactory) Create(serviceName string) *HandlerController
 
 	return &HandlerController{
 		DB:           f.db,
+		Conf:         f.conf,
 		Hooks:        f.hooks,
 		Logger:       logger,
 		Queries:      f.queries,

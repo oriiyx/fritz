@@ -18,7 +18,7 @@ export function DashboardPage() {
         <div className="space-y-6">
             <div>
                 <h1 className="text-3xl font-bold">Dashboard</h1>
-                <p className="mt-2 text-base-content/70">Welcome back, {user?.full_name || 'User'}!</p>
+                <p className="mt-2 text-base-content/70">Welcome back, {user?.display_name || 'User'}!</p>
             </div>
 
             {/* Stats Grid */}

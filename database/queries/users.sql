@@ -1,8 +1,14 @@
 -- name: CreateUser :one
 -- noinspection SqlResolve
-INSERT INTO users (email, full_name, avatar_url)
-VALUES ($1, $2, $3)
+INSERT INTO users (email, password)
+VALUES ($1, hash_password($2))
 RETURNING *;
+
+-- name: VerifyPassword :one
+-- noinspection SqlResolve
+SELECT verify_password($1, password)
+FROM users
+WHERE email = $2;
 
 -- name: CreateOAuthIdentity :one
 -- noinspection SqlResolve
@@ -15,6 +21,12 @@ RETURNING *;
 SELECT *
 FROM users
 WHERE email = $1;
+
+-- name: GetUserByID :one
+-- noinspection SqlResolve
+SELECT *
+FROM users
+WHERE id = $1;
 
 -- name: GetOAuthIdentityByProviderAndToken :one
 -- noinspection SqlResolve

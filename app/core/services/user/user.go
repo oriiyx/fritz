@@ -1,12 +1,8 @@
 package services
 
 import (
-	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/markbates/goth"
@@ -39,70 +35,68 @@ type UserWithOAuth struct {
 	OAuthIdentity db.OauthIdentity
 }
 
-func (s *UserService) CreateUserWithOAuth(ctx context.Context, req CreateUserWithOAuthRequest) (*UserWithOAuth, error) {
-	var result UserWithOAuth
-
-	// Start transaction
-	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
-		// Create queries instance with transaction
-		qtx := s.queries.WithTx(tx)
-
-		// Check if user already exists
-		existingUser, err := qtx.GetUserByEmail(ctx, req.Email)
-		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-			return fmt.Errorf("failed to check existing user: %w", err)
-		}
-
-		var user db.User
-		if errors.Is(err, pgx.ErrNoRows) {
-			// Create new user
-			user, err = qtx.CreateUser(ctx, db.CreateUserParams{
-				Email:     req.Email,
-				FullName:  req.FullName,
-				AvatarUrl: req.AvatarURL,
-			})
-			if err != nil {
-				return fmt.Errorf("failed to create user: %w", err)
-			}
-		} else {
-			user = existingUser
-		}
-
-		// Check if OAuth identity already exists
-		_, err = qtx.GetOAuthIdentityByProviderAndToken(ctx, db.GetOAuthIdentityByProviderAndTokenParams{
-			Provider: req.Provider,
-			IDToken:  req.IDToken,
-		})
-		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-			return fmt.Errorf("failed to check existing OAuth identity: %w", err)
-		}
-
-		var oauthIdentity db.OauthIdentity
-		if errors.Is(err, pgx.ErrNoRows) {
-			// Create OAuth identity
-			oauthIdentity, err = qtx.CreateOAuthIdentity(ctx, db.CreateOAuthIdentityParams{
-				UserID:   user.ID,
-				Provider: req.Provider,
-				IDToken:  req.IDToken,
-				Email:    req.Email.String,
-				RawData:  req.RawData,
-			})
-			if err != nil {
-				return fmt.Errorf("failed to create OAuth identity: %w", err)
-			}
-		}
-
-		result.User = user
-		result.OAuthIdentity = oauthIdentity
-		return nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &result, nil
-}
+// func (s *UserService) CreateUserWithOAuth(ctx context.Context, req CreateUserWithOAuthRequest) (*UserWithOAuth, error) {
+// 	var result UserWithOAuth
+//
+// 	// Start transaction
+// 	err := pgx.BeginFunc(ctx, s.pool, func(tx pgx.Tx) error {
+// 		// Create queries instance with transaction
+// 		qtx := s.queries.WithTx(tx)
+//
+// 		// Check if user already exists
+// 		existingUser, err := qtx.GetUserByEmail(ctx, req.Email)
+// 		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+// 			return fmt.Errorf("failed to check existing user: %w", err)
+// 		}
+//
+// 		var user db.User
+// 		if errors.Is(err, pgx.ErrNoRows) {
+// 			// Create new user
+// 			user, err = qtx.CreateUser(ctx, db.CreateUserParams{
+// 				Email:     req.Email,
+// 			})
+// 			if err != nil {
+// 				return fmt.Errorf("failed to create user: %w", err)
+// 			}
+// 		} else {
+// 			user = existingUser
+// 		}
+//
+// 		// Check if OAuth identity already exists
+// 		_, err = qtx.GetOAuthIdentityByProviderAndToken(ctx, db.GetOAuthIdentityByProviderAndTokenParams{
+// 			Provider: req.Provider,
+// 			IDToken:  req.IDToken,
+// 		})
+// 		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+// 			return fmt.Errorf("failed to check existing OAuth identity: %w", err)
+// 		}
+//
+// 		var oauthIdentity db.OauthIdentity
+// 		if errors.Is(err, pgx.ErrNoRows) {
+// 			// Create OAuth identity
+// 			oauthIdentity, err = qtx.CreateOAuthIdentity(ctx, db.CreateOAuthIdentityParams{
+// 				UserID:   user.ID,
+// 				Provider: req.Provider,
+// 				IDToken:  req.IDToken,
+// 				Email:    req.Email.String,
+// 				RawData:  req.RawData,
+// 			})
+// 			if err != nil {
+// 				return fmt.Errorf("failed to create OAuth identity: %w", err)
+// 			}
+// 		}
+//
+// 		result.User = user
+// 		result.OAuthIdentity = oauthIdentity
+// 		return nil
+// 	})
+//
+// 	if err != nil {
+// 		return nil, err
+// 	}
+//
+// 	return &result, nil
+// }
 
 // CreateUserFromGothUser
 // Helper function to convert goth.User to CreateUserWithOAuthRequest

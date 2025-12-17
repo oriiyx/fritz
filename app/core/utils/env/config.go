@@ -12,6 +12,7 @@ type Conf struct {
 	DB           ConfDB
 	Auth         ConfAuth
 	Server       ConfServer
+	Session      ConfSession
 	GoogleAuth   ConfGoogleAuth
 	GithubAuth   ConfGithubAuth
 	IsProduction bool
@@ -57,6 +58,12 @@ type ConfGoogleAuth struct {
 type ConfGithubAuth struct {
 	ID     string `env:"GITHUB_CLIENT_ID"`
 	Secret string `env:"GITHUB_CLIENT_SECRET"`
+}
+
+type ConfSession struct {
+	SecureCookie      bool          `env:"SESSION_COOKIE_SECURE,required"`
+	SessionDuration   time.Duration `env:"SESSION_DURATION,required"`
+	SessionCookieName string        `env:"SESSION_COOKIE_NAME,required"`
 }
 
 func (c *Conf) GetBaseURL() string {
