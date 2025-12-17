@@ -1,6 +1,6 @@
 import {useState} from 'react'
-import {useForm} from '@tanstack/react-form'
 import type {AnyFieldApi} from '@tanstack/react-form'
+import {useForm} from '@tanstack/react-form'
 import {useMutation} from '@tanstack/react-query'
 import {useNavigate} from '@tanstack/react-router'
 import {authApi} from '../services/authService'
