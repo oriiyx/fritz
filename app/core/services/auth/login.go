@@ -82,6 +82,5 @@ func (a *API) Login(w http.ResponseWriter, r *http.Request) {
 		Secure: a.EnvConf.IsProduction,
 	})
 
-	a.Logger.Info().Str(l.KeyReqID, reqID).Str("email", req.Email).Msg("User logged in successfully")
-	http.Redirect(w, r, "http://localhost:3333/dashboard", http.StatusFound)
+	_ = json.NewEncoder(w).Encode(user)
 }

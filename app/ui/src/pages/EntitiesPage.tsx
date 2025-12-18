@@ -207,14 +207,16 @@ export function EntitiesPage() {
                                 <div className="divider"></div>
 
                                 {/* Layout Tree */}
-                                <div>
-                                    <label className="label">
-                                        <span className="label-text font-semibold">Layout Structure</span>
-                                    </label>
-                                    <div className="rounded-lg border border-base-300 bg-base-200 p-4">
-                                        <LayoutTree definition={selectedDefinition}/>
+                                {selectedDefinition.layout?.components?.length > 0 && (
+                                    <div>
+                                        <label className="label">
+                                            <span className="label-text font-semibold">Layout Structure</span>
+                                        </label>
+                                        <div className="rounded-lg border border-base-300 bg-base-200 p-4">
+                                            <LayoutTree definition={selectedDefinition}/>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         ) : (
                             <div className="py-12 text-center text-base-content/50">

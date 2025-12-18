@@ -1,28 +1,69 @@
-import {createRootRoute, createRoute, createRouter} from '@tanstack/react-router'
+import {createRootRoute, createRoute, createRouter, redirect} from '@tanstack/react-router'
 import {RootLayout} from './layouts/RootLayout'
 import {DashboardLayout} from './layouts/DashboardLayout'
 import {LoginPage} from './pages/LoginPage'
 import {DashboardPage} from './pages/DashboardPage'
 import {NotFoundPage} from './pages/NotFoundPage'
-import {EntitiesPage} from "@/pages/EntitiesPage.tsx";
+import {EntitiesPage} from "@/pages/EntitiesPage.tsx"
+import {authApi} from './services/authService'
 
-// Root route
+// Root route - no authentication check here
 const rootRoute = createRootRoute({
     component: RootLayout,
 })
 
-// Guest routes (no authentication required)
+// Login route - redirect to dashboard if already authenticated
 const loginRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/login',
     component: LoginPage,
+    beforeLoad: async () => {
+        try {
+            const user = await authApi.checkAuth()
+            if (user) {
+                // Already authenticated, go to dashboard
+                throw redirect({to: '/', replace: true})
+            }
+        } catch (error) {
+            // Expected error when not authenticated - allow login page to show
+            // Don't redirect, just let the login page render
+        }
+    },
 })
 
-// Dashboard layout route (no path specified - it's just a layout wrapper)
+// Protected routes - check authentication before loading
 const dashboardRoute = createRoute({
     getParentRoute: () => rootRoute,
-    id: 'dashboard',  // Use id instead of path for layout-only routes
+    id: 'dashboard',
     component: DashboardLayout,
+    beforeLoad: async ({location}) => {
+        try {
+            const user = await authApi.checkAuth()
+
+            // If checkAuth returns null/undefined, redirect to login
+            if (!user) {
+                throw redirect({
+                    to: '/login',
+                    search: {
+                        redirect: location.href,
+                    },
+                    replace: true,
+                })
+            }
+
+            // User authenticated, allow access
+            return {user}
+        } catch (error: any) {
+            // Any error (including 401) means not authenticated
+            throw redirect({
+                to: '/login',
+                search: {
+                    redirect: location.href,
+                },
+                replace: true,
+            })
+        }
+    },
 })
 
 const entitiesRoute = createRoute({
@@ -31,7 +72,6 @@ const entitiesRoute = createRoute({
     component: EntitiesPage,
 })
 
-// Dashboard index route - this is what actually matches '/'
 const dashboardIndexRoute = createRoute({
     getParentRoute: () => dashboardRoute,
     path: '/',

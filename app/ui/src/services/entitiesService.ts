@@ -17,6 +17,11 @@ export const entitiesApi = {
     getEntityDefinitions: async (): Promise<EntityDefinition[]> => {
         try {
             const response = await apiClient.get<EntityDefinition[]>('/api/v1/definitions')
+            console.log(response)
+            if (response.data === null) {
+                console.log("empty")
+                return []
+            }
             return response.data
         } catch (error: any) {
             if (error?.response?.status !== 401) {

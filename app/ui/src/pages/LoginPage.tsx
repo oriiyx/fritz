@@ -2,7 +2,7 @@ import {useState} from 'react'
 import type {AnyFieldApi} from '@tanstack/react-form'
 import {useForm} from '@tanstack/react-form'
 import {useMutation} from '@tanstack/react-query'
-import {useNavigate} from '@tanstack/react-router'
+import {useNavigate, useSearch} from '@tanstack/react-router'
 import {authApi} from '../services/authService'
 import {useAuthStore} from '../stores/authStore'
 import {Card, CardBody} from "@/components/Card.tsx"
@@ -24,6 +24,7 @@ function FieldError({field}: { field: AnyFieldApi }) {
 
 export function LoginPage() {
     const navigate = useNavigate()
+    const search = useSearch({from: '/login'})
     const {setUser} = useAuthStore()
     const [loginError, setLoginError] = useState<string | null>(null)
 
@@ -32,7 +33,9 @@ export function LoginPage() {
             authApi.loginWithPassword(email, password),
         onSuccess: (user) => {
             setUser(user)
-            navigate({to: '/'})
+            // Redirect to the page they were trying to access, or dashboard
+            const redirectTo = (search as any)?.redirect || '/'
+            navigate({to: redirectTo})
         },
         onError: (error: any) => {
             console.error('Login error:', error)
