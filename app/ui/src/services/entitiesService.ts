@@ -1,5 +1,6 @@
 import {apiClient} from '../lib/api'
 import {CreateNewEntityDefinition, EntityDefinition} from '../stores/entitiesDefinitionsStore'
+import {getErrorDetails, getErrorMessage} from '../lib/errorHandler'
 
 export interface CreateEntityDefinitionRequest {
     id: string
@@ -23,11 +24,10 @@ export const entitiesApi = {
                 return []
             }
             return response.data
-        } catch (error: any) {
-            if (error?.response?.status !== 401) {
-                console.error('Entity definition error:', error)
-            }
-            throw error
+        } catch (error: unknown) {
+            const errorDetails = getErrorDetails(error)
+            console.error('Entity definition error:', errorDetails)
+            throw new Error(getErrorMessage(error))
         }
     },
 
@@ -36,9 +36,10 @@ export const entitiesApi = {
         try {
             const response = await apiClient.get<EntityDefinition>(`/api/v1/definitions/${id}`)
             return response.data
-        } catch (error: any) {
-            console.error('Entity definition error:', error)
-            throw error
+        } catch (error: unknown) {
+            const errorDetails = getErrorDetails(error)
+            console.error('Entity definition error:', errorDetails)
+            throw new Error(getErrorMessage(error))
         }
     },
 
@@ -56,9 +57,10 @@ export const entitiesApi = {
                 '/api/v1/definitions/create',
                 payload
             )
-        } catch (error: any) {
-            console.error('Create entity definition error:', error)
-            throw error
+        } catch (error: unknown) {
+            const errorDetails = getErrorDetails(error)
+            console.error('Create entity definition error:', errorDetails)
+            throw new Error(getErrorMessage(error))
         }
     },
 
@@ -73,9 +75,10 @@ export const entitiesApi = {
                 definition
             )
             return response.data
-        } catch (error: any) {
-            console.error('Update entity definition error:', error)
-            throw error
+        } catch (error: unknown) {
+            const errorDetails = getErrorDetails(error)
+            console.error('Update entity definition error:', errorDetails)
+            throw new Error(getErrorMessage(error))
         }
     },
 
@@ -83,9 +86,10 @@ export const entitiesApi = {
     deleteEntityDefinition: async (id: string): Promise<void> => {
         try {
             await apiClient.delete(`/api/v1/definitions/${id}`)
-        } catch (error: any) {
-            console.error('Delete entity definition error:', error)
-            throw error
+        } catch (error: unknown) {
+            const errorDetails = getErrorDetails(error)
+            console.error('Delete entity definition error:', errorDetails)
+            throw new Error(getErrorMessage(error))
         }
     },
 
@@ -94,9 +98,10 @@ export const entitiesApi = {
         try {
             const response = await apiClient.get('/api/v1/definitions/data-component-types')
             return response.data
-        } catch (error: any) {
-            console.error('Data component types error:', error)
-            throw error
+        } catch (error: unknown) {
+            const errorDetails = getErrorDetails(error)
+            console.error('Data component types error:', errorDetails)
+            throw new Error(getErrorMessage(error))
         }
     },
 }

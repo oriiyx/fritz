@@ -7,39 +7,28 @@ import {Input} from '@/components/Input'
 import {Alert} from '@/components/Alert'
 import {Loading} from '@/components/Loading'
 import {entitiesApi} from '@/services/entitiesService'
-import {DefinitionComponent, EntityDefinition, useEntityDefinitionsStore,} from '@/stores/entitiesDefinitionsStore'
+import type {DefinitionComponent, EntityDefinition,} from '@/stores/entitiesDefinitionsStore'
 
 export function EntitiesPage() {
     const queryClient = useQueryClient()
-    const {
-        entityDefinitions,
-        selectedDefinition,
-        setEntityDefinitions,
-        setSelectedDefinition,
-        addEntityDefinition,
-    } = useEntityDefinitionsStore()
 
+    // Local state management
+    const [selectedDefinition, setSelectedDefinition] = useState<EntityDefinition | null>(null)
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
     const [newEntityId, setNewEntityId] = useState('')
     const [newEntityName, setNewEntityName] = useState('')
     const [createError, setCreateError] = useState<string | null>(null)
 
-    // Fetch entity definitions
-    const {isLoading, error} = useQuery({
+    // Fetch entity definitions using React Query
+    const {data: entityDefinitions = [], isLoading, error} = useQuery({
         queryKey: ['entity-definitions'],
-        queryFn: async () => {
-            const data = await entitiesApi.getEntityDefinitions()
-            setEntityDefinitions(data)
-            return data
-        },
+        queryFn: entitiesApi.getEntityDefinitions,
     })
 
     // Create entity definition mutation
     const createMutation = useMutation({
         mutationFn: entitiesApi.createEntityDefinition,
         onSuccess: () => {
-            const data = entitiesApi.getEntityDefinitions()
-            setEntityDefinitions(data)
             queryClient.invalidateQueries({queryKey: ['entity-definitions']})
             setIsCreateModalOpen(false)
             setNewEntityId('')
@@ -152,7 +141,7 @@ export function EntitiesPage() {
                                                 <div className="mt-2 flex gap-2">
                                                     <span
                                                         className="badge badge-sm badge-outline">
-                                                        {definition.layout?.components?.length} components
+                                                        {definition.layout?.components?.length || 0} components
                                                     </span>
                                                     {definition.allowInherit && (
                                                         <span className="badge badge-sm badge-primary">

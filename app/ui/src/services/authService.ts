@@ -1,5 +1,6 @@
 import {apiClient} from '../lib/api'
 import {User} from '../stores/authStore'
+import {getErrorDetails, isApiError} from '../lib/errorHandler'
 
 export const authApi = {
     // Check current authentication status
@@ -7,10 +8,11 @@ export const authApi = {
         try {
             const response = await apiClient.get<User>('/api/v1/auth/me')
             return response.data
-        } catch (error: any) {
+        } catch (error: unknown) {
             // Don't log 401 errors - they're expected when not logged in
-            if (error?.response?.status !== 401) {
-                console.error('Auth check error:', error)
+            if (isApiError(error) && error.response?.status !== 401) {
+                const errorDetails = getErrorDetails(error)
+                console.error('Auth check error:', errorDetails)
             }
             return null
         }

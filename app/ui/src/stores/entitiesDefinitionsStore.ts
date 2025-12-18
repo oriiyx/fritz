@@ -1,6 +1,4 @@
-import {create} from 'zustand'
-import {persist} from 'zustand/middleware'
-
+// Type definitions for entity components and definitions
 export type ComponentType = 'input' | 'integer' | 'date'
 
 export interface InputSettings {
@@ -50,57 +48,3 @@ export interface EntityDefinition {
     allowInherit: boolean
     layout: DefinitionLayout
 }
-
-interface EntityDefinitionState {
-    entityDefinitions: EntityDefinition[]
-    selectedDefinition: EntityDefinition | null
-    isLoading: boolean
-    setEntityDefinitions: (definitions: EntityDefinition[]) => void
-    setSelectedDefinition: (definition: EntityDefinition | null) => void
-    addEntityDefinition: (definition: CreateNewEntityDefinition) => void
-    updateEntityDefinition: (id: string, definition: EntityDefinition) => void
-    removeEntityDefinition: (id: string) => void
-    setLoading: (loading: boolean) => void
-}
-
-export const useEntityDefinitionsStore = create<EntityDefinitionState>()(
-    persist(
-        (set) => ({
-            entityDefinitions: [],
-            selectedDefinition: null,
-            isLoading: false,
-            setEntityDefinitions: (definitions) =>
-                set({entityDefinitions: definitions, isLoading: false}),
-            setSelectedDefinition: (definition) =>
-                set({selectedDefinition: definition}),
-            addEntityDefinition: (definition) =>
-                set((state) => ({
-                    entityDefinitions: [...state.entityDefinitions, definition],
-                })),
-            updateEntityDefinition: (id, definition) =>
-                set((state) => ({
-                    entityDefinitions: state.entityDefinitions.map((def) =>
-                        def.id === id ? definition : def
-                    ),
-                    selectedDefinition:
-                        state.selectedDefinition?.id === id
-                            ? definition
-                            : state.selectedDefinition,
-                })),
-            removeEntityDefinition: (id) =>
-                set((state) => ({
-                    entityDefinitions: state.entityDefinitions.filter(
-                        (def) => def.id !== id
-                    ),
-                    selectedDefinition:
-                        state.selectedDefinition?.id === id
-                            ? null
-                            : state.selectedDefinition,
-                })),
-            setLoading: (loading) => set({isLoading: loading}),
-        }),
-        {
-            name: 'fritz-entities-definitions',
-        }
-    )
-)
