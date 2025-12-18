@@ -34,13 +34,7 @@ export function UserMenu({user}: UserMenuProps) {
                 className="avatar btn btn-circle btn-ghost"
                 onClick={() => setIsOpen(!isOpen)}
             >
-                {user.avatar_url ? (
-                    <div className="w-10 rounded-full">
-                        <img alt={user.full_name} src={user.avatar_url}/>
-                    </div>
-                ) : (
-                    <UserCircleIcon className="h-8 w-8"/>
-                )}
+                <UserCircleIcon className="h-8 w-8"/>
             </div>
             {isOpen && (
                 <ul
@@ -48,7 +42,7 @@ export function UserMenu({user}: UserMenuProps) {
                     className="menu dropdown-content menu-sm z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow"
                 >
                     <li className="menu-title">
-                        <span>{user.full_name}</span>
+                        <span>{user.display_name}</span>
                         <span className="text-xs font-normal">{user.email}</span>
                     </li>
                     <li>

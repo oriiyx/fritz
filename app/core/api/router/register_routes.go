@@ -28,6 +28,7 @@ func (c *Controller) RegisterRoutes() {
 
 		definitionsHandler := defHandler.NewDefinitionsHandler(handlerFactory.Create("definitions"))
 		r.Route("/definitions", func(definitions chi.Router) {
+			definitions.Method(http.MethodGet, "/", requestlog.NewHandler(definitionsHandler.GetExisting, c.Logger))
 			definitions.Method(http.MethodGet, "/data-component-types", requestlog.NewHandler(definitionsHandler.GetDataComponentTypes, c.Logger))
 			definitions.Method(http.MethodPost, "/create", requestlog.NewHandler(definitionsHandler.Create, c.Logger))
 		})

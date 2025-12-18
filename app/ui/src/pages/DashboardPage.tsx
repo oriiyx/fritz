@@ -3,9 +3,11 @@ import {ChartBarIcon, CubeIcon, DocumentTextIcon, UsersIcon,} from '@heroicons/r
 import {Stat, Stats} from "@/components/Stats.tsx";
 import {Card, CardBody, CardTitle} from "@/components/Card.tsx";
 import {Button} from "@/components/Button.tsx";
+import {useNavigate} from "@tanstack/react-router";
 
 export function DashboardPage() {
     const {user} = useAuthStore()
+    const navigate = useNavigate()
 
     const statsData = [
         {name: 'Total Entities', value: '0', icon: CubeIcon, color: 'text-primary'},
@@ -42,7 +44,8 @@ export function DashboardPage() {
                 <CardBody>
                     <CardTitle>Quick Actions</CardTitle>
                     <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        <Button variant="primary" outline iconLeft={<CubeIcon className="h-5 w-5"/>}>
+                        <Button variant="primary" outline iconLeft={<CubeIcon className="h-5 w-5"/>}
+                                onClick={() => navigate({to: '/entities'})}>
                             Create Entity
                         </Button>
                         <Button variant="secondary" outline iconLeft={<DocumentTextIcon className="h-5 w-5"/>}>

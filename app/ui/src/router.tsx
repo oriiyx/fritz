@@ -4,6 +4,7 @@ import {DashboardLayout} from './layouts/DashboardLayout'
 import {LoginPage} from './pages/LoginPage'
 import {DashboardPage} from './pages/DashboardPage'
 import {NotFoundPage} from './pages/NotFoundPage'
+import {EntitiesPage} from "@/pages/EntitiesPage.tsx";
 
 // Root route
 const rootRoute = createRootRoute({
@@ -24,6 +25,12 @@ const dashboardRoute = createRoute({
     component: DashboardLayout,
 })
 
+const entitiesRoute = createRoute({
+    getParentRoute: () => dashboardRoute,
+    path: '/entities',
+    component: EntitiesPage,
+})
+
 // Dashboard index route - this is what actually matches '/'
 const dashboardIndexRoute = createRoute({
     getParentRoute: () => dashboardRoute,
@@ -41,7 +48,7 @@ const notFoundRoute = createRoute({
 // Create route tree
 const routeTree = rootRoute.addChildren([
     loginRoute,
-    dashboardRoute.addChildren([dashboardIndexRoute]),
+    dashboardRoute.addChildren([dashboardIndexRoute, entitiesRoute]),
     notFoundRoute,
 ])
 

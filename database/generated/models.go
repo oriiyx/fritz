@@ -22,6 +22,13 @@ type Entity struct {
 	UpdatedBy   pgtype.UUID
 }
 
+type EntityOrder struct {
+	ID        pgtype.UUID
+	EntityID  pgtype.UUID
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+}
+
 type EntityProduct struct {
 	ID            pgtype.UUID
 	EntityID      pgtype.UUID

@@ -1,11 +1,6 @@
 import {apiClient} from '../lib/api'
 import {User} from '../stores/authStore'
 
-export interface LoginResponse {
-    user: User
-    message?: string
-}
-
 export const authApi = {
     // Check current authentication status
     checkAuth: async (): Promise<User | null> => {

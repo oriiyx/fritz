@@ -8,5 +8,4 @@ import (
 
 // LoadAll registers all entity adapters
 func LoadAll(queries *db.Queries) {
-	Register("product", NewProductAdapter(queries))
 }
