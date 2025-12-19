@@ -18,7 +18,7 @@ const navItems: NavItem[] = [
 
 export function Sidebar() {
     return (
-        <aside className="menu min-h-full w-64 bg-base-100 p-4 text-base-content">
+        <aside className="menu min-h-full w-48 bg-base-300/20 py-4 px-1 text-base-content">
             <div className="mb-4">
                 <h2 className="px-4 text-lg font-semibold">Navigation</h2>
             </div>

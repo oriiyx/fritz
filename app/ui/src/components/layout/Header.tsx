@@ -6,7 +6,7 @@ export function Header() {
     const {user} = useAuthStore()
 
     return (
-        <header className="navbar bg-base-100 shadow-lg">
+        <header className="navbar bg-base-300/20">
             <div className="flex-1">
                 <label htmlFor="sidebar-drawer" className="btn btn-ghost btn-circle lg:hidden">
                     <Bars3Icon className="h-6 w-6"/>

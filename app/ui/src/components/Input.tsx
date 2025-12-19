@@ -41,7 +41,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             .join(' ')
 
         return (
-            <div className={`form-control ${fullWidth ? 'w-full' : ''}`}>
+            <div className={`form-control fieldset ${fullWidth ? 'w-full' : ''}`}>
                 {label && (
                     <label className="label">
                         <span className="label-text">{label}</span>

@@ -1,16 +1,20 @@
-import {useEffect, useState} from 'react'
+import {useState} from 'react'
 import {useQuery} from '@tanstack/react-query'
-import {ChevronDownIcon, ChevronRightIcon} from '@heroicons/react/24/outline'
 import {Card, CardBody, CardTitle} from '@/components/Card'
 import {Alert} from '@/components/Alert'
 import {Loading} from '@/components/Loading'
 import {entitiesApi} from '@/services/entitiesService'
-import type {DefinitionComponent, EntityDefinition,} from '@/stores/entitiesDefinitionsStore'
-import {EntityList} from "@/components/entities/EntityList.tsx";
+import type {ComponentType, DefinitionComponent, EntityDefinition} from '@/stores/entitiesDefinitionsStore'
+import type {DataComponent} from '@/stores/dataComponentTypesStore'
+import {EntityList} from '@/components/entities/EntityList.tsx'
+import {ComponentLayoutTree} from '@/components/entities/ComponentLayoutTree'
+import {AddComponentDropdown} from '@/components/entities/AddComponentDropdown'
+import {ComponentSettingsPanel} from '@/components/entities/ComponentSettingsPanel'
 
 export function EntitiesPage() {
     // Local state management
     const [selectedDefinition, setSelectedDefinition] = useState<EntityDefinition | null>(null)
+    const [selectedComponent, setSelectedComponent] = useState<DefinitionComponent | null>(null)
 
     // Fetch entity definitions using React Query
     const {data: entityDefinitions = [], isLoading, error} = useQuery({
@@ -18,11 +22,11 @@ export function EntitiesPage() {
         queryFn: entitiesApi.getEntityDefinitions,
     })
 
-    // Fetch entity definitions using React Query
+    // Fetch data component types using React Query
     const {
         data: dataComponentTypes = [],
         isLoading: isDataComponentLoading,
-        error: dataComponentError
+        error: dataComponentError,
     } = useQuery({
         queryKey: ['data-component-types'],
         queryFn: entitiesApi.getDataComponentTypes,
@@ -30,11 +34,121 @@ export function EntitiesPage() {
 
     const handleSelectDefinition = (definition: EntityDefinition) => {
         setSelectedDefinition(definition)
+        setSelectedComponent(null) // Clear selected component when switching definitions
     }
 
-    useEffect(() => {
-        console.log('Data Component Types', dataComponentTypes)
-    }, [dataComponentTypes]);
+    const handleComponentsReorder = (newComponents: DefinitionComponent[]) => {
+        if (!selectedDefinition) return
+
+        const updatedDefinition = {
+            ...selectedDefinition,
+            layout: {
+                ...selectedDefinition.layout,
+                components: newComponents,
+            },
+        }
+
+        setSelectedDefinition(updatedDefinition)
+        // TODO: Persist to backend via mutation
+        console.log('Components reordered:', newComponents)
+    }
+
+    const handleComponentSelect = (component: DefinitionComponent) => {
+        setSelectedComponent(component)
+    }
+
+    const handleComponentUpdate = (updatedComponent: DefinitionComponent) => {
+        if (!selectedDefinition) return
+
+        const updatedComponents = selectedDefinition.layout.components.map((c) =>
+            c.name === updatedComponent.name ? updatedComponent : c
+        )
+
+        const updatedDefinition = {
+            ...selectedDefinition,
+            layout: {
+                ...selectedDefinition.layout,
+                components: updatedComponents,
+            },
+        }
+
+        setSelectedDefinition(updatedDefinition)
+        setSelectedComponent(updatedComponent)
+        // TODO: Persist to backend via mutation
+        console.log('Component updated:', updatedComponent)
+    }
+
+    const handleComponentDelete = (component: DefinitionComponent) => {
+        if (!selectedDefinition) return
+
+        // Confirm deletion
+        if (!confirm(`Delete component "${component.title}"?`)) return
+
+        const updatedComponents = selectedDefinition.layout.components.filter(
+            (c) => c.name !== component.name
+        )
+
+        const updatedDefinition = {
+            ...selectedDefinition,
+            layout: {
+                ...selectedDefinition.layout,
+                components: updatedComponents,
+            },
+        }
+
+        setSelectedDefinition(updatedDefinition)
+
+        // Clear selection if deleted component was selected
+        if (selectedComponent?.name === component.name) {
+            setSelectedComponent(null)
+        }
+
+        // TODO: Persist to backend via mutation
+        console.log('Component deleted:', component.name)
+    }
+
+    const handleAddComponent = (componentType: DataComponent) => {
+        if (!selectedDefinition) return
+
+        // Generate unique name for the component
+        const baseName = componentType.id.toLowerCase()
+        const existingNames = selectedDefinition.layout.components.map((c) => c.name)
+        let counter = 1
+        let newName = baseName
+
+        while (existingNames.includes(newName)) {
+            newName = `${baseName}${counter}`
+            counter++
+        }
+
+        // Create new component with default settings
+        const newComponent: DefinitionComponent = {
+            type: componentType.id as ComponentType, // todo - make a mapping like we have in the go app/core/services/objects/definitions/data-component-types.go:28
+            name: newName,
+            title: componentType.label,
+            dbtype: componentType.defaultDBType,
+            mandatory: false,
+            invisible: false,
+            notEditable: false,
+            settings: {},
+        }
+
+        const updatedComponents = [...selectedDefinition.layout.components, newComponent]
+
+        const updatedDefinition = {
+            ...selectedDefinition,
+            layout: {
+                ...selectedDefinition.layout,
+                components: updatedComponents,
+            },
+        }
+
+        setSelectedDefinition(updatedDefinition)
+        setSelectedComponent(newComponent) // Auto-select the new component
+
+        // TODO: Persist to backend via mutation
+        console.log('Component added:', newComponent)
+    }
 
     if (isLoading || isDataComponentLoading) {
         return (
@@ -47,9 +161,7 @@ export function EntitiesPage() {
     if (error || dataComponentError) {
         return (
             <div className="space-y-6">
-                <Alert variant="error">
-                    Failed to load entity definitions. Please try again.
-                </Alert>
+                <Alert variant="error">Failed to load entity definitions. Please try again.</Alert>
             </div>
         )
     }
@@ -60,9 +172,7 @@ export function EntitiesPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold">Entity Definitions</h1>
-                    <p className="mt-2 text-base-content/70">
-                        Manage your entity schemas and structures
-                    </p>
+                    <p className="mt-2 text-base-content/70">Manage your entity schemas and structures</p>
                 </div>
             </div>
 
@@ -79,13 +189,13 @@ export function EntitiesPage() {
 
                 {/* Right Panel - Entity Details (3/4) */}
                 <div className="lg:col-span-3">
-                    <Card>
-                        <CardBody>
-                            <CardTitle>Definition Details</CardTitle>
-                            {selectedDefinition ? (
-                                <div className="space-y-6">
-                                    {/* Basic Info */}
-                                    <div className="space-y-3">
+                    {selectedDefinition ? (
+                        <div className="space-y-6">
+                            {/* Basic Info Card */}
+                            <Card>
+                                <CardBody>
+                                    <CardTitle>Definition Details</CardTitle>
+                                    <div className="mt-4 space-y-3">
                                         <div>
                                             <label className="label">
                                                 <span className="label-text font-semibold">Name</span>
@@ -111,149 +221,59 @@ export function EntitiesPage() {
                                             </div>
                                         )}
                                     </div>
+                                </CardBody>
+                            </Card>
 
-                                    <div className="divider"></div>
-
-                                    {/* Layout Tree */}
-                                    {selectedDefinition.layout?.components?.length > 0 && (
-                                        <div>
-                                            <label className="label">
-                                                <span className="label-text font-semibold">Layout Structure</span>
-                                            </label>
-                                            <div className="rounded-lg border border-base-300 bg-base-200 p-4">
-                                                <LayoutTree definition={selectedDefinition}/>
+                            {/* Component Management Split View */}
+                            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                                {/* Left: Component Tree (1/3) */}
+                                <div className="space-y-4">
+                                    <Card>
+                                        <CardBody>
+                                            <CardTitle>Components</CardTitle>
+                                            <div className="mt-4 space-y-4">
+                                                <AddComponentDropdown
+                                                    dataComponentTypes={dataComponentTypes}
+                                                    onAddComponent={handleAddComponent}
+                                                />
+                                                <ComponentLayoutTree
+                                                    components={selectedDefinition.layout.components}
+                                                    selectedComponent={selectedComponent}
+                                                    onComponentsReorder={handleComponentsReorder}
+                                                    onComponentSelect={handleComponentSelect}
+                                                    onComponentDelete={handleComponentDelete}
+                                                />
                                             </div>
-                                        </div>
-                                    )}
+                                        </CardBody>
+                                    </Card>
                                 </div>
-                            ) : (
-                                <div className="py-12 text-center text-base-content/50">
-                                    <p>Select a definition from the list to view details</p>
+
+                                {/* Right: Settings Panel (2/3) */}
+                                <div className="lg:col-span-2">
+                                    <ComponentSettingsPanel
+                                        component={selectedComponent}
+                                        onComponentUpdate={handleComponentUpdate}
+                                    />
                                 </div>
-                            )}
-                        </CardBody>
-                    </Card>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-// Tree component for displaying layout structure
-function LayoutTree({definition}: { definition: EntityDefinition }) {
-    const [expandedComponents, setExpandedComponents] = useState<Set<string>>(new Set())
-
-    const toggleComponent = (componentName: string) => {
-        setExpandedComponents((prev) => {
-            const next = new Set(prev)
-            if (next.has(componentName)) {
-                next.delete(componentName)
-            } else {
-                next.add(componentName)
-            }
-            return next
-        })
-    }
-
-    return (
-        <div className="space-y-2">
-            {/* Root Layout Node */}
-            <div className="flex items-center gap-2 font-mono text-sm">
-                <span className="badge badge-sm badge-neutral">{definition.layout.type}</span>
-                <span className="text-base-content/60">Layout Root</span>
-            </div>
-
-            {/* Components */}
-            {definition.layout.components.length === 0 ? (
-                <div className="ml-8 py-4 text-sm text-base-content/50">No components defined</div>
-            ) : (
-                <div className="ml-4 space-y-2">
-                    {definition.layout.components.map((component) => (
-                        <ComponentNode
-                            key={component.name}
-                            component={component}
-                            isExpanded={expandedComponents.has(component.name)}
-                            onToggle={() => toggleComponent(component.name)}
-                        />
-                    ))}
-                </div>
-            )}
-        </div>
-    )
-}
-
-// Individual component node in tree
-function ComponentNode({
-                           component,
-                           isExpanded,
-                           onToggle,
-                       }: {
-    component: DefinitionComponent
-    isExpanded: boolean
-    onToggle: () => void
-}) {
-    return (
-        <div className="rounded border border-base-300 bg-base-100">
-            <button
-                onClick={onToggle}
-                className="flex w-full items-center gap-2 p-3 text-left hover:bg-base-200"
-            >
-                {isExpanded ? (
-                    <ChevronDownIcon className="h-4 w-4 flex-shrink-0"/>
-                ) : (
-                    <ChevronRightIcon className="h-4 w-4 flex-shrink-0"/>
-                )}
-                <div className="flex flex-1 items-center gap-2">
-                    <span className="badge badge-sm badge-primary">{component.type}</span>
-                    <span className="font-medium">{component.title}</span>
-                    <span className="font-mono text-xs text-base-content/50">
-                        ({component.name})
-                    </span>
-                </div>
-            </button>
-
-            {isExpanded && (
-                <div className="border-t border-base-300 bg-base-200/50 p-3 text-sm">
-                    <div className="grid gap-2">
-                        <div className="flex justify-between">
-                            <span className="text-base-content/60">Database Type:</span>
-                            <span className="font-mono">{component.dbtype}</span>
+                            </div>
                         </div>
-                        <div className="flex justify-between">
-                            <span className="text-base-content/60">Mandatory:</span>
-                            <span>{component.mandatory ? 'Yes' : 'No'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-base-content/60">Visible:</span>
-                            <span>{component.invisible ? 'No' : 'Yes'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-base-content/60">Editable:</span>
-                            <span>{component.notEditable ? 'No' : 'Yes'}</span>
-                        </div>
-
-                        {/* Settings */}
-                        {Object.keys(component.settings).length > 0 && (
-                            <>
-                                <div className="divider my-1"></div>
-                                <div className="text-xs font-semibold text-base-content/60">Settings:</div>
-                                {Object.entries(component.settings).map(([key, value]) => (
-                                    <div key={key} className="flex justify-between">
-                                        <span className="text-base-content/60">{key}:</span>
-                                        <span className="font-mono text-xs">
-                                            {typeof value === 'boolean'
-                                                ? value
-                                                    ? 'true'
-                                                    : 'false'
-                                                : value?.toString() || 'null'}
-                                        </span>
+                    ) : (
+                        <Card>
+                            <CardBody>
+                                <div
+                                    className="flex h-96 items-center justify-center py-12 text-center text-base-content/50">
+                                    <div>
+                                        <p className="text-lg">No definition selected</p>
+                                        <p className="mt-2 text-sm">
+                                            Select a definition from the list to view and edit its components
+                                        </p>
                                     </div>
-                                ))}
-                            </>
-                        )}
-                    </div>
+                                </div>
+                            </CardBody>
+                        </Card>
+                    )}
                 </div>
-            )}
+            </div>
         </div>
     )
 }

@@ -3,3 +3,7 @@
 @plugin "daisyui" {
     themes: light --default, dark --prefersdark, cupcake, corporate;
 }
+
+:root {
+    --card-p: 0.5rem
+}

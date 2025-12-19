@@ -34,7 +34,7 @@ export function DashboardLayout() {
             <input id="sidebar-drawer" type="checkbox" className="drawer-toggle"/>
             <div className="drawer-content flex flex-col">
                 <Header/>
-                <main className="flex-1 overflow-y-auto bg-base-200 p-6">
+                <main className="flex-1 overflow-y-auto bg-base-100 p-4">
                     <Outlet/>
                 </main>
                 <Footer/>
