@@ -1,16 +1,11 @@
 import {apiClient} from '../lib/api'
 import {CreateNewEntityDefinition, EntityDefinition} from '../stores/entitiesDefinitionsStore'
 import {getErrorDetails, getErrorMessage} from '../lib/errorHandler'
+import {DataComponent} from "@/stores/dataComponentTypesStore.ts";
 
 export interface CreateEntityDefinitionRequest {
     id: string
     name: string
-    description?: string
-    allowInherit?: boolean
-    layout?: {
-        type: string
-        components: Array<any>
-    }
 }
 
 export const entitiesApi = {
@@ -45,7 +40,7 @@ export const entitiesApi = {
 
     // Create new entity definition
     createEntityDefinition: async (
-        definition: CreateEntityDefinitionRequest
+        definition: EntityDefinition
     ): Promise<void> => {
         try {
             const payload: CreateNewEntityDefinition = {
@@ -94,9 +89,9 @@ export const entitiesApi = {
     },
 
     // Get available data component types
-    getDataComponentTypes: async (): Promise<any[]> => {
+    getDataComponentTypes: async (): Promise<DataComponent[]> => {
         try {
-            const response = await apiClient.get('/api/v1/definitions/data-component-types')
+            const response = await apiClient.get<DataComponent[]>('/api/v1/definitions/data-component-types')
             return response.data
         } catch (error: unknown) {
             const errorDetails = getErrorDetails(error)
