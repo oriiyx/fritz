@@ -1,8 +1,9 @@
 import {useState} from 'react'
-import {useQuery} from '@tanstack/react-query'
+import {useQuery, useMutation} from '@tanstack/react-query'
 import {Card, CardBody, CardTitle} from '@/components/Card'
 import {Alert} from '@/components/Alert'
 import {Loading} from '@/components/Loading'
+import {Button} from '@/components/Button'
 import {entitiesApi} from '@/services/entitiesService'
 import type {ComponentType, DefinitionComponent, EntityDefinition} from '@/stores/entitiesDefinitionsStore'
 import type {DataComponent} from '@/stores/dataComponentTypesStore'
@@ -10,11 +11,13 @@ import {EntityList} from '@/components/entities/EntityList.tsx'
 import {ComponentLayoutTree} from '@/components/entities/ComponentLayoutTree'
 import {AddComponentDropdown} from '@/components/entities/AddComponentDropdown'
 import {ComponentSettingsPanel} from '@/components/entities/ComponentSettingsPanel'
+import {CheckCircleIcon} from '@heroicons/react/24/outline'
 
 export function EntitiesPage() {
     // Local state management
     const [selectedDefinition, setSelectedDefinition] = useState<EntityDefinition | null>(null)
     const [selectedComponent, setSelectedComponent] = useState<DefinitionComponent | null>(null)
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
     // Fetch entity definitions using React Query
     const {data: entityDefinitions = [], isLoading, error} = useQuery({
@@ -32,9 +35,25 @@ export function EntitiesPage() {
         queryFn: entitiesApi.getDataComponentTypes,
     })
 
+    // Save mutation
+    const saveMutation = useMutation({
+        mutationFn: async (definition: EntityDefinition) => {
+            await entitiesApi.updateEntityDefinition(definition.id, definition)
+        },
+        onSuccess: () => {
+            setHasUnsavedChanges(false)
+        },
+    })
+
     const handleSelectDefinition = (definition: EntityDefinition) => {
+        if (hasUnsavedChanges) {
+            if (!confirm('You have unsaved changes. Do you want to discard them?')) {
+                return
+            }
+        }
         setSelectedDefinition(definition)
-        setSelectedComponent(null) // Clear selected component when switching definitions
+        setSelectedComponent(null)
+        setHasUnsavedChanges(false)
     }
 
     const handleComponentsReorder = (newComponents: DefinitionComponent[]) => {
@@ -49,8 +68,7 @@ export function EntitiesPage() {
         }
 
         setSelectedDefinition(updatedDefinition)
-        // TODO: Persist to backend via mutation
-        console.log('Components reordered:', newComponents)
+        setHasUnsavedChanges(true)
     }
 
     const handleComponentSelect = (component: DefinitionComponent) => {
@@ -74,14 +92,12 @@ export function EntitiesPage() {
 
         setSelectedDefinition(updatedDefinition)
         setSelectedComponent(updatedComponent)
-        // TODO: Persist to backend via mutation
-        console.log('Component updated:', updatedComponent)
+        setHasUnsavedChanges(true)
     }
 
     const handleComponentDelete = (component: DefinitionComponent) => {
         if (!selectedDefinition) return
 
-        // Confirm deletion
         if (!confirm(`Delete component "${component.title}"?`)) return
 
         const updatedComponents = selectedDefinition.layout.components.filter(
@@ -98,19 +114,16 @@ export function EntitiesPage() {
 
         setSelectedDefinition(updatedDefinition)
 
-        // Clear selection if deleted component was selected
         if (selectedComponent?.name === component.name) {
             setSelectedComponent(null)
         }
 
-        // TODO: Persist to backend via mutation
-        console.log('Component deleted:', component.name)
+        setHasUnsavedChanges(true)
     }
 
     const handleAddComponent = (componentType: DataComponent) => {
         if (!selectedDefinition) return
 
-        // Generate unique name for the component
         const baseName = componentType.id.toLowerCase()
         const existingNames = selectedDefinition.layout.components.map((c) => c.name)
         let counter = 1
@@ -121,9 +134,8 @@ export function EntitiesPage() {
             counter++
         }
 
-        // Create new component with default settings
         const newComponent: DefinitionComponent = {
-            type: componentType.id as ComponentType, // todo - make a mapping like we have in the go app/core/services/objects/definitions/data-component-types.go:28
+            type: componentType.id as ComponentType,
             name: newName,
             title: componentType.label,
             dbtype: componentType.defaultDBType,
@@ -144,10 +156,13 @@ export function EntitiesPage() {
         }
 
         setSelectedDefinition(updatedDefinition)
-        setSelectedComponent(newComponent) // Auto-select the new component
+        setSelectedComponent(newComponent)
+        setHasUnsavedChanges(true)
+    }
 
-        // TODO: Persist to backend via mutation
-        console.log('Component added:', newComponent)
+    const handleSave = () => {
+        if (!selectedDefinition) return
+        saveMutation.mutate(selectedDefinition)
     }
 
     if (isLoading || isDataComponentLoading) {
@@ -167,7 +182,7 @@ export function EntitiesPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-24">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
@@ -260,9 +275,8 @@ export function EntitiesPage() {
                     ) : (
                         <Card>
                             <CardBody>
-                                <div
-                                    className="flex h-96 items-center justify-center py-12 text-center text-base-content/50">
-                                    <div>
+                                <div className="flex h-96 items-center justify-center text-base-content/50">
+                                    <div className="text-center">
                                         <p className="text-lg">No definition selected</p>
                                         <p className="mt-2 text-sm">
                                             Select a definition from the list to view and edit its components
@@ -274,6 +288,37 @@ export function EntitiesPage() {
                     )}
                 </div>
             </div>
+
+            {/* Fixed Bottom Bar - Only show when a definition is selected */}
+            {selectedDefinition && (
+                <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-base-300 bg-base-100 shadow-lg">
+                    <div className="mx-auto flex items-center justify-between px-6 py-4">
+                        <div className="flex items-center gap-3">
+                            {hasUnsavedChanges ? (
+                                <>
+                                    <span className="badge badge-warning">Unsaved Changes</span>
+                                    <span className="text-sm text-base-content/70">
+                                        You have unsaved changes to {selectedDefinition.name}
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    <CheckCircleIcon className="h-5 w-5 text-success"/>
+                                    <span className="text-sm text-base-content/70">All changes saved</span>
+                                </>
+                            )}
+                        </div>
+                        <Button
+                            variant="primary"
+                            onClick={handleSave}
+                            disabled={!hasUnsavedChanges || saveMutation.isPending}
+                            loading={saveMutation.isPending}
+                        >
+                            {saveMutation.isPending ? 'Saving...' : 'Save Changes'}
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
