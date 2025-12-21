@@ -1,7 +1,7 @@
+import * as React from 'react'
 import {useState} from 'react'
 import {Bars3Icon, TrashIcon} from '@heroicons/react/24/outline'
 import {DataComponent} from '@/generated/definitions'
-import * as React from "react";
 
 interface Props {
     components: DataComponent[]
@@ -38,7 +38,7 @@ export function ComponentLayoutTree({
         const midpoint = rect.top + rect.height / 2
         const position = e.clientY < midpoint ? 'above' : 'below'
 
-        setDropIndicator({ index, position })
+        setDropIndicator({index, position})
     }
 
     const handleDrop = (e: React.DragEvent, dropIndex: number) => {
@@ -85,7 +85,8 @@ export function ComponentLayoutTree({
 
     if (components.length === 0) {
         return (
-            <div className="flex h-48 items-center justify-center rounded-lg border-2 border-dashed border-base-300 bg-base-100">
+            <div
+                className="flex h-48 items-center justify-center rounded-lg border-2 border-dashed border-base-300 bg-base-100">
                 <div className="text-center text-base-content/50">
                     <p className="text-sm">No components yet</p>
                     <p className="mt-1 text-xs">Add your first component to get started</p>
@@ -100,7 +101,7 @@ export function ComponentLayoutTree({
                 <div key={component.name}>
                     {/* Drop indicator above */}
                     {dropIndicator?.index === index && dropIndicator.position === 'above' && (
-                        <div className="my-1 h-0.5 bg-primary" />
+                        <div className="my-1 h-0.5 bg-primary"/>
                     )}
 
                     <div
@@ -125,14 +126,15 @@ export function ComponentLayoutTree({
                             className="cursor-grab text-base-content/40 transition-colors hover:text-primary active:cursor-grabbing"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <Bars3Icon className="h-5 w-5" />
+                            <Bars3Icon className="h-5 w-5"/>
                         </div>
 
                         {/* Component Info */}
                         <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1">
                                 <span className="badge badge-primary badge-xs">{component.type}</span>
-                                <span title={component.title} className="truncate text-xs font-medium">{component.title}</span>
+                                <span title={component.title}
+                                      className="truncate text-xs font-medium">{component.title}</span>
                             </div>
                             <span className="text-xs font-mono text-base-content/60">
                                 {component.name}
@@ -145,13 +147,13 @@ export function ComponentLayoutTree({
                             className="opacity-0 transition-opacity group-hover:opacity-100 btn btn-ghost btn-sm btn-circle"
                             title="Delete component"
                         >
-                            <TrashIcon className="h-4 w-4 text-error" />
+                            <TrashIcon className="h-4 w-4 text-error"/>
                         </button>
                     </div>
 
                     {/* Drop indicator below */}
                     {dropIndicator?.index === index && dropIndicator.position === 'below' && (
-                        <div className="my-1 h-0.5 bg-primary" />
+                        <div className="my-1 h-0.5 bg-primary"/>
                     )}
                 </div>
             ))}

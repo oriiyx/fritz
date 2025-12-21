@@ -1,6 +1,6 @@
 import {useState} from 'react'
-import {PlusIcon, ChevronDownIcon} from '@heroicons/react/24/outline'
-import {DataComponentDefinition, DataComponentCategory} from '@/generated/definitions'
+import {ChevronDownIcon, PlusIcon} from '@heroicons/react/24/outline'
+import {DataComponentCategory, DataComponentDefinition} from '@/generated/definitions'
 
 interface Props {
     dataComponentTypes: DataComponentDefinition[]
