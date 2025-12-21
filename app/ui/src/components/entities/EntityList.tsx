@@ -1,6 +1,6 @@
 import {Card, CardBody, CardTitle} from "@/components/Card.tsx";
 import {CubeIcon} from "@heroicons/react/24/outline";
-import {EntityDefinition} from "@/stores/entitiesDefinitionsStore.ts";
+import {EntityDefinition} from "@/generated/definitions";
 import {Loading} from "@/components/Loading.tsx";
 
 interface EntityListProps {

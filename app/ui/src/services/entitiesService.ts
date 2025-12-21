@@ -1,12 +1,6 @@
 import {apiClient} from '../lib/api'
-import {CreateNewEntityDefinition, EntityDefinition} from '../stores/entitiesDefinitionsStore'
+import {EntityDefinition, DataComponentDefinition} from '@/generated/definitions'
 import {getErrorDetails, getErrorMessage} from '../lib/errorHandler'
-import {DataComponent} from "@/stores/dataComponentTypesStore.ts";
-
-export interface CreateEntityDefinitionRequest {
-    id: string
-    name: string
-}
 
 export const entitiesApi = {
     // Get all entity definitions
@@ -34,27 +28,6 @@ export const entitiesApi = {
         } catch (error: unknown) {
             const errorDetails = getErrorDetails(error)
             console.error('Entity definition error:', errorDetails)
-            throw new Error(getErrorMessage(error))
-        }
-    },
-
-    // Create new entity definition
-    createEntityDefinition: async (
-        definition: EntityDefinition
-    ): Promise<void> => {
-        try {
-            const payload: CreateNewEntityDefinition = {
-                id: definition.id,
-                name: definition.name,
-            }
-
-            await apiClient.post<EntityDefinition>(
-                '/api/v1/definitions/create',
-                payload
-            )
-        } catch (error: unknown) {
-            const errorDetails = getErrorDetails(error)
-            console.error('Create entity definition error:', errorDetails)
             throw new Error(getErrorMessage(error))
         }
     },
@@ -89,9 +62,9 @@ export const entitiesApi = {
     },
 
     // Get available data component types
-    getDataComponentTypes: async (): Promise<DataComponent[]> => {
+    getDataComponentTypes: async (): Promise<DataComponentDefinition[]> => {
         try {
-            const response = await apiClient.get<DataComponent[]>('/api/v1/definitions/data-component-types')
+            const response = await apiClient.get<DataComponentDefinition[]>('/api/v1/definitions/data-component-types')
             return response.data
         } catch (error: unknown) {
             const errorDetails = getErrorDetails(error)

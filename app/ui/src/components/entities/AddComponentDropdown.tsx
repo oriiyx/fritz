@@ -1,47 +1,47 @@
-import { useState } from 'react'
-import { PlusIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
-import { DataComponent, DataComponentCategory } from '@/stores/dataComponentTypesStore'
+import {useState} from 'react'
+import {PlusIcon, ChevronDownIcon} from '@heroicons/react/24/outline'
+import {DataComponentDefinition, DataComponentCategory} from '@/generated/definitions'
 
 interface Props {
-    dataComponentTypes: DataComponent[]
-    onAddComponent: (componentType: DataComponent) => void
+    dataComponentTypes: DataComponentDefinition[]
+    onAddComponent: (componentType: DataComponentDefinition) => void
 }
 
-export function AddComponentDropdown({ dataComponentTypes, onAddComponent }: Props) {
+export function AddComponentDropdown({dataComponentTypes, onAddComponent}: Props) {
     const [isOpen, setIsOpen] = useState(false)
 
     // Group components by category
     const groupedComponents = dataComponentTypes.reduce(
         (acc, component) => {
-            const category = component.categories
+            const category = component.category
             if (!acc[category]) {
                 acc[category] = []
             }
             acc[category].push(component)
             return acc
         },
-        {} as Record<DataComponentCategory, DataComponent[]>
+        {} as Record<DataComponentCategory, DataComponentDefinition[]>
     )
 
-    const handleSelect = (component: DataComponent) => {
+    const handleSelect = (component: DataComponentDefinition) => {
         onAddComponent(component)
         setIsOpen(false)
     }
 
     const getCategoryLabel = (category: DataComponentCategory): string => {
         const labels: Record<DataComponentCategory, string> = {
-            [DataComponentCategory.Text]: 'Text',
-            [DataComponentCategory.Numeric]: 'Numeric',
-            [DataComponentCategory.Date]: 'Date',
+            text: 'Text',
+            numeric: 'Numeric',
+            date: 'Date',
         }
         return labels[category]
     }
 
     const getCategoryIcon = (category: DataComponentCategory): string => {
         const icons: Record<DataComponentCategory, string> = {
-            [DataComponentCategory.Text]: '📝',
-            [DataComponentCategory.Numeric]: '#️⃣',
-            [DataComponentCategory.Date]: '📅',
+            text: '📝',
+            numeric: '#️⃣',
+            date: '📅',
         }
         return icons[category]
     }
@@ -53,9 +53,9 @@ export function AddComponentDropdown({ dataComponentTypes, onAddComponent }: Pro
                 onClick={() => setIsOpen(!isOpen)}
                 className="btn btn-primary btn-block gap-2"
             >
-                <PlusIcon className="h-5 w-5" />
+                <PlusIcon className="h-5 w-5"/>
                 Add Component
-                <ChevronDownIcon className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                <ChevronDownIcon className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}/>
             </button>
 
             {isOpen && (

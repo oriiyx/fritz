@@ -1,10 +1,10 @@
-import {DefinitionComponent} from '@/stores/entitiesDefinitionsStore'
+import {DataComponent} from '@/generated/definitions'
 import {Input} from '@/components/Input'
 import {Card, CardBody, CardTitle} from '@/components/Card'
 
 interface Props {
-    component: DefinitionComponent | null
-    onComponentUpdate: (updatedComponent: DefinitionComponent) => void
+    component: DataComponent | null
+    onComponentUpdate: (updatedComponent: DataComponent) => void
 }
 
 export function ComponentSettingsPanel({component, onComponentUpdate}: Props) {
@@ -23,7 +23,7 @@ export function ComponentSettingsPanel({component, onComponentUpdate}: Props) {
         )
     }
 
-    const handleFieldChange = (field: keyof DefinitionComponent, value: any) => {
+    const handleFieldChange = (field: keyof DataComponent, value: any) => {
         onComponentUpdate({
             ...component,
             [field]: value,

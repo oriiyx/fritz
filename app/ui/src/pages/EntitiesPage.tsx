@@ -5,8 +5,12 @@ import {Alert} from '@/components/Alert'
 import {Loading} from '@/components/Loading'
 import {Button} from '@/components/Button'
 import {entitiesApi} from '@/services/entitiesService'
-import type {ComponentType, DefinitionComponent, EntityDefinition} from '@/stores/entitiesDefinitionsStore'
-import type {DataComponent} from '@/stores/dataComponentTypesStore'
+import {
+    EntityDefinition,
+    DataComponent,
+    DataComponentDefinition,
+    DataComponentType,
+} from '@/generated/definitions'
 import {EntityList} from '@/components/entities/EntityList.tsx'
 import {ComponentLayoutTree} from '@/components/entities/ComponentLayoutTree'
 import {AddComponentDropdown} from '@/components/entities/AddComponentDropdown'
@@ -16,7 +20,7 @@ import {CheckCircleIcon} from '@heroicons/react/24/outline'
 export function EntitiesPage() {
     // Local state management
     const [selectedDefinition, setSelectedDefinition] = useState<EntityDefinition | null>(null)
-    const [selectedComponent, setSelectedComponent] = useState<DefinitionComponent | null>(null)
+    const [selectedComponent, setSelectedComponent] = useState<DataComponent | null>(null)
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
     // Fetch entity definitions using React Query
@@ -56,7 +60,7 @@ export function EntitiesPage() {
         setHasUnsavedChanges(false)
     }
 
-    const handleComponentsReorder = (newComponents: DefinitionComponent[]) => {
+    const handleComponentsReorder = (newComponents: DataComponent[]) => {
         if (!selectedDefinition) return
 
         const updatedDefinition = {
@@ -71,11 +75,11 @@ export function EntitiesPage() {
         setHasUnsavedChanges(true)
     }
 
-    const handleComponentSelect = (component: DefinitionComponent) => {
+    const handleComponentSelect = (component: DataComponent) => {
         setSelectedComponent(component)
     }
 
-    const handleComponentUpdate = (updatedComponent: DefinitionComponent) => {
+    const handleComponentUpdate = (updatedComponent: DataComponent) => {
         if (!selectedDefinition) return
 
         const updatedComponents = selectedDefinition.layout.components.map((c) =>
@@ -95,7 +99,7 @@ export function EntitiesPage() {
         setHasUnsavedChanges(true)
     }
 
-    const handleComponentDelete = (component: DefinitionComponent) => {
+    const handleComponentDelete = (component: DataComponent) => {
         if (!selectedDefinition) return
 
         if (!confirm(`Delete component "${component.title}"?`)) return
@@ -121,7 +125,7 @@ export function EntitiesPage() {
         setHasUnsavedChanges(true)
     }
 
-    const handleAddComponent = (componentType: DataComponent) => {
+    const handleAddComponent = (componentType: DataComponentDefinition) => {
         if (!selectedDefinition) return
 
         const baseName = componentType.id.toLowerCase()
@@ -134,8 +138,8 @@ export function EntitiesPage() {
             counter++
         }
 
-        const newComponent: DefinitionComponent = {
-            type: componentType.id as ComponentType,
+        const newComponent: DataComponent = {
+            type: componentType.id as DataComponentType,
             name: newName,
             title: componentType.label,
             dbtype: componentType.defaultDBType,

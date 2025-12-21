@@ -1,14 +1,14 @@
-import { useState } from 'react'
-import { Bars3Icon, TrashIcon } from '@heroicons/react/24/outline'
-import { DefinitionComponent } from '@/stores/entitiesDefinitionsStore'
+import {useState} from 'react'
+import {Bars3Icon, TrashIcon} from '@heroicons/react/24/outline'
+import {DataComponent} from '@/generated/definitions'
 import * as React from "react";
 
 interface Props {
-    components: DefinitionComponent[]
-    selectedComponent: DefinitionComponent | null
-    onComponentsReorder: (newComponents: DefinitionComponent[]) => void
-    onComponentSelect: (component: DefinitionComponent) => void
-    onComponentDelete: (component: DefinitionComponent) => void
+    components: DataComponent[]
+    selectedComponent: DataComponent | null
+    onComponentsReorder: (newComponents: DataComponent[]) => void
+    onComponentSelect: (component: DataComponent) => void
+    onComponentDelete: (component: DataComponent) => void
 }
 
 export function ComponentLayoutTree({
@@ -74,11 +74,11 @@ export function ComponentLayoutTree({
         setDropIndicator(null)
     }
 
-    const handleClick = (component: DefinitionComponent) => {
+    const handleClick = (component: DataComponent) => {
         onComponentSelect(component)
     }
 
-    const handleDelete = (e: React.MouseEvent, component: DefinitionComponent) => {
+    const handleDelete = (e: React.MouseEvent, component: DataComponent) => {
         e.stopPropagation() // Prevent selecting when deleting
         onComponentDelete(component)
     }
