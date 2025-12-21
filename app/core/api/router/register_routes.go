@@ -31,6 +31,7 @@ func (c *Controller) RegisterRoutes() {
 			definitions.Method(http.MethodGet, "/", requestlog.NewHandler(definitionsHandler.GetExisting, c.Logger))
 			definitions.Method(http.MethodGet, "/data-component-types", requestlog.NewHandler(definitionsHandler.GetDataComponentTypes, c.Logger))
 			definitions.Method(http.MethodPost, "/create", requestlog.NewHandler(definitionsHandler.Create, c.Logger))
+			definitions.Method(http.MethodPut, "/{id}", requestlog.NewHandler(definitionsHandler.Update, c.Logger))
 		})
 
 		entitiesHandler := entities.NewEntitiesHandler(handlerFactory.Create("entities"))
