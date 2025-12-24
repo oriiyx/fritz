@@ -39,7 +39,7 @@ export const entitiesApi = {
     ): Promise<EntityDefinition> => {
         try {
             const response = await apiClient.put<EntityDefinition>(
-                `/api/v1/definitions/${id}`,
+                `/api/v1/definitions/${id}/update`,
                 definition
             )
             return response.data

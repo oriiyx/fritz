@@ -1,10 +1,10 @@
 import {DataComponent} from '@/generated/definitions'
 import {Card, CardBody, CardTitle} from '@/components/Card'
-import {CommonSettingsFields} from './settings/CommonSettingsFields'
+import {CommonSettingsFields} from '@/components/entities/settings'
 import {InputSettings} from './settings/InputSettings'
 import {IntegerSettings} from './settings/IntegerSettings'
 import {DateSettings} from './settings/DateSettings'
-import {isDateComponent, isInputComponent, isIntegerComponent,} from './settings/ComponentSettingsTypes'
+import {isDateComponent, isInputComponent, isIntegerComponent,} from '@/components/entities/settings'
 
 interface Props {
     component: DataComponent | null

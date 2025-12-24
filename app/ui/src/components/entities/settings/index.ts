@@ -1,5 +1,5 @@
-export * from './ComponentSettingsBase'
 export * from './CommonSettingsFields'
+export * from './ComponentSettingsTypes'
 export * from './InputSettings'
 export * from './IntegerSettings'
 export * from './DateSettings'
