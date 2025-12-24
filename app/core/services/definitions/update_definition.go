@@ -58,6 +58,32 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		7. Create fresh CRUD Operations with the existing function
 	*/
 
+	// 1. get existing definition
+	existingDefinition, err := h.entityBuilder.LoadDefinitionByID(ID)
+	if err != nil {
+		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msg("Failed to load existing definition for update")
+		errhandler.ServerError(w, errhandler.RespDBDataAccessFailure)
+		return
+	}
+
+	// 2. compare differences
+	changeset, err := h.entityBuilder.CompareDefinitions(existingDefinition, &req)
+	if err != nil {
+		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msg("Failed to compare old and new definition for update")
+		errhandler.ServerError(w, errhandler.RespDBDataAccessFailure)
+		return
+	}
+
+	// 3. create UPDATE TABLE dynamic query and run it
+	tablename := h.entityBuilder.CreateEntityTableName(existingDefinition)
+	err = h.entityBuilder.UpdateTableFromChangeset(changeset, tablename, r.Context())
+	if err != nil {
+		h.Logger.Error().Err(err).Interface("definition", req).Msg("Failed to create update table queries")
+		errhandler.ServerError(w, errhandler.RespDBDataUpdateFailure)
+		return
+	}
+
+	// 4. Update the database/schema/entity_*.sql with a fresh schema
 	err = h.entityBuilder.StoreDefinitionIntoEntityFile(&req)
 	if err != nil {
 		h.Logger.Error().Err(err).Interface("definition", req).Msg("Failed to store definitions into entity .json file")
@@ -65,6 +91,15 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 5. Update the database/schema/entity_*.sql with a fresh schema
+	_, err = h.entityBuilder.CreateEntityTable(r.Context(), &req)
+	if err != nil {
+		h.Logger.Error().Err(err).Interface("definition", req).Msg("Failed to create entity table")
+		errhandler.ServerError(w, errhandler.RespDBDataInsertFailure)
+		return
+	}
+
+	// 6 & 7. Update the database/schema/entity_*.sql with a fresh schema
 	err = h.entityBuilder.CreateCrudOperations(tablename, &req)
 	if err != nil {
 		h.Logger.Error().Err(err).Interface("definition", req).Msg("Failed to create crud operations")

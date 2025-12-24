@@ -11,7 +11,7 @@ import (
 const entitiesTableSchemaFilePathTemplate = "database/schema"
 
 func (e *EntityBuilder) CreateEntityTable(ctx context.Context, definition *definitions.EntityDefinition) (string, error) {
-	tableName := fmt.Sprintf("entity_%s", definition.ID)
+	tableName := e.CreateEntityTableName(definition)
 
 	// Build CREATE TABLE statement from definition.Layout.Components
 	columns := []string{
@@ -42,4 +42,9 @@ func (e *EntityBuilder) CreateEntityTable(ctx context.Context, definition *defin
 	}
 
 	return tableName, nil
+}
+
+func (e *EntityBuilder) CreateEntityTableName(definition *definitions.EntityDefinition) string {
+	tableName := fmt.Sprintf("entity_%s", definition.ID)
+	return tableName
 }

@@ -78,7 +78,7 @@ func (dc *DataComponent) ValidateSettings() error {
 	return nil
 }
 
-// ToColumnDefinition generates SQL column definition
+// ToColumnDefinition generates SQL add column definition to table
 func (dc *DataComponent) ToColumnDefinition() string {
 	parts := []string{dc.Name, string(dc.DBType)}
 
