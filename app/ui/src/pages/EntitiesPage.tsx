@@ -1,16 +1,11 @@
 import {useState} from 'react'
-import {useQuery, useMutation} from '@tanstack/react-query'
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
 import {Card, CardBody, CardTitle} from '@/components/Card'
 import {Alert} from '@/components/Alert'
 import {Loading} from '@/components/Loading'
 import {Button} from '@/components/Button'
 import {entitiesApi} from '@/services/entitiesService'
-import {
-    EntityDefinition,
-    DataComponent,
-    DataComponentDefinition,
-    DataComponentType,
-} from '@/generated/definitions'
+import {DataComponent, DataComponentDefinition, DataComponentType, EntityDefinition,} from '@/generated/definitions'
 import {EntityList} from '@/components/entities/EntityList.tsx'
 import {ComponentLayoutTree} from '@/components/entities/ComponentLayoutTree'
 import {AddComponentDropdown} from '@/components/entities/AddComponentDropdown'
@@ -18,6 +13,8 @@ import {ComponentSettingsPanel} from '@/components/entities/ComponentSettingsPan
 import {CheckCircleIcon} from '@heroicons/react/24/outline'
 
 export function EntitiesPage() {
+    const queryClient = useQueryClient()
+
     // Local state management
     const [selectedDefinition, setSelectedDefinition] = useState<EntityDefinition | null>(null)
     const [selectedComponent, setSelectedComponent] = useState<DataComponent | null>(null)
@@ -45,6 +42,22 @@ export function EntitiesPage() {
             await entitiesApi.updateEntityDefinition(definition.id, definition)
         },
         onSuccess: () => {
+            setHasUnsavedChanges(false)
+        },
+    })
+
+    // Delete mutation
+    const deleteMutation = useMutation({
+        mutationFn: async (id: string) => {
+            await entitiesApi.deleteEntityDefinition(id)
+        },
+        onSuccess: () => {
+            // Invalidate and refetch entity definitions
+            queryClient.invalidateQueries({queryKey: ['entity-definitions']})
+
+            // Clear selection
+            setSelectedDefinition(null)
+            setSelectedComponent(null)
             setHasUnsavedChanges(false)
         },
     })
@@ -169,6 +182,16 @@ export function EntitiesPage() {
         saveMutation.mutate(selectedDefinition)
     }
 
+    const handleDelete = () => {
+        if (!selectedDefinition) return
+
+        const confirmMessage = `Are you sure you want to delete "${selectedDefinition.name}"?\n\nThis action cannot be undone and will permanently remove this entity definition and all its components.`
+
+        if (!confirm(confirmMessage)) return
+
+        deleteMutation.mutate(selectedDefinition.id)
+    }
+
     if (isLoading || isDataComponentLoading) {
         return (
             <div className="flex h-full items-center justify-center">
@@ -213,7 +236,19 @@ export function EntitiesPage() {
                             {/* Basic Info Card */}
                             <Card>
                                 <CardBody>
-                                    <CardTitle>Definition Details</CardTitle>
+                                    <div className="flex items-center justify-between">
+                                        <CardTitle>Definition Details</CardTitle>
+                                        <Button
+                                            variant="error"
+                                            outline
+                                            size="sm"
+                                            onClick={handleDelete}
+                                            disabled={deleteMutation.isPending}
+                                            loading={deleteMutation.isPending}
+                                        >
+                                            {deleteMutation.isPending ? 'Deleting...' : 'Delete Definition'}
+                                        </Button>
+                                    </div>
                                     <div className="mt-4 space-y-3">
                                         <div>
                                             <label className="label">

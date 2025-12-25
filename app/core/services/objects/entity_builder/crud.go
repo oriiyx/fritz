@@ -9,7 +9,7 @@ import (
 	"github.com/oriiyx/fritz/app/core/services/objects/definitions"
 )
 
-const entitiesTableQueriesFilePathTemplate = "database/fritz"
+const EntitiesTableQueriesFilePathTemplate = "database/fritz"
 
 func (e *EntityBuilder) CreateCrudOperations(tablename string, d *definitions.EntityDefinition) error {
 	queriesName := fmt.Sprintf("queries_%s", d.ID)
@@ -38,7 +38,7 @@ func (e *EntityBuilder) CreateCrudOperations(tablename string, d *definitions.En
 
 	sql := strings.Join([]string{commentBlock, createStatement, editStatement, readStatement, deleteStatement}, "\n\n")
 
-	err = e.cw.WriteNewFile(sql, entitiesTableQueriesFilePathTemplate, fmt.Sprintf("%s.sql", queriesName))
+	err = e.cw.WriteNewFile(sql, EntitiesTableQueriesFilePathTemplate, fmt.Sprintf("%s.sql", queriesName))
 	if err != nil {
 		return fmt.Errorf("failed to write CRUD queries file: %w", err)
 	}
@@ -46,7 +46,7 @@ func (e *EntityBuilder) CreateCrudOperations(tablename string, d *definitions.En
 	e.logger.Info().
 		Str("table", tablename).
 		Str("entity_id", d.ID).
-		Str("file", fmt.Sprintf("%s/%s.sql", entitiesTableQueriesFilePathTemplate, queriesName)).
+		Str("file", fmt.Sprintf("%s/%s.sql", EntitiesTableQueriesFilePathTemplate, queriesName)).
 		Msg("Generated CRUD operations file")
 
 	// Run sqlc generate

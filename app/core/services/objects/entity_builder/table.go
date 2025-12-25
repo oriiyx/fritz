@@ -8,7 +8,7 @@ import (
 	"github.com/oriiyx/fritz/app/core/services/objects/definitions"
 )
 
-const entitiesTableSchemaFilePathTemplate = "database/schema"
+const EntitiesTableSchemaFilePathTemplate = "database/schema"
 
 func (e *EntityBuilder) CreateEntityTable(ctx context.Context, definition *definitions.EntityDefinition) (string, error) {
 	tableName := e.CreateEntityTableName(definition)
@@ -36,7 +36,7 @@ func (e *EntityBuilder) CreateEntityTable(ctx context.Context, definition *defin
 		return "", err
 	}
 
-	err = e.cw.WriteNewFile(sql, entitiesTableSchemaFilePathTemplate, fmt.Sprintf("%s.sql", tableName))
+	err = e.cw.WriteNewFile(sql, EntitiesTableSchemaFilePathTemplate, fmt.Sprintf("%s.sql", tableName))
 	if err != nil {
 		return "", err
 	}

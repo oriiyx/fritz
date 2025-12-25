@@ -1,5 +1,5 @@
 import {apiClient} from '../lib/api'
-import {EntityDefinition, DataComponentDefinition} from '@/generated/definitions'
+import {DataComponentDefinition, EntityDefinition} from '@/generated/definitions'
 import {getErrorDetails, getErrorMessage} from '../lib/errorHandler'
 
 export const entitiesApi = {
@@ -53,7 +53,7 @@ export const entitiesApi = {
     // Delete entity definition
     deleteEntityDefinition: async (id: string): Promise<void> => {
         try {
-            await apiClient.delete(`/api/v1/definitions/${id}`)
+            await apiClient.delete(`/api/v1/definitions/${id}/delete`)
         } catch (error: unknown) {
             const errorDetails = getErrorDetails(error)
             console.error('Delete entity definition error:', errorDetails)

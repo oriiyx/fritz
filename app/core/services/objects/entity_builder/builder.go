@@ -13,7 +13,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-const entitiesDefinitionsFilePathTemplate = "var/entities/definitions"
+const EntitiesDefinitionsFilePathTemplate = "var/entities/definitions"
 
 type EntityBuilder struct {
 	db     *pgxpool.Pool
@@ -82,16 +82,15 @@ func (e *EntityBuilder) ValidateExistingDefinition(definition *definitions.Entit
 }
 
 func (e *EntityBuilder) StoreDefinitionIntoEntityFile(definition *definitions.EntityDefinition) error {
-	slugEntityName := slug.CreateSlug(definition.Name)
-	filename := fmt.Sprintf("entity_%s.json", slugEntityName)
+	filename := e.CreateEntityDefinitionFileName(definition)
 
 	// First create directory
-	if err := os.MkdirAll(entitiesDefinitionsFilePathTemplate, 0755); err != nil {
+	if err := os.MkdirAll(EntitiesDefinitionsFilePathTemplate, 0755); err != nil {
 		return fmt.Errorf("failed to create var/entities/definitions directory: %w", err)
 	}
 
 	// Second create the .json file
-	filePath := filepath.Join(entitiesDefinitionsFilePathTemplate, filename)
+	filePath := filepath.Join(EntitiesDefinitionsFilePathTemplate, filename)
 	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to create definition entity file: %w", err)
@@ -107,9 +106,13 @@ func (e *EntityBuilder) StoreDefinitionIntoEntityFile(definition *definitions.En
 	return nil
 }
 
+func (e *EntityBuilder) CreateEntityDefinitionFileName(definition *definitions.EntityDefinition) string {
+	return fmt.Sprintf("entity_%s.json", slug.CreateSlug(definition.ID))
+}
+
 func (e *EntityBuilder) LoadDefinitionsFromEntityFiles() ([]*definitions.EntityDefinition, error) {
 	// load all the entity files that are stored
-	entries, err := os.ReadDir(entitiesDefinitionsFilePathTemplate)
+	entries, err := os.ReadDir(EntitiesDefinitionsFilePathTemplate)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +121,7 @@ func (e *EntityBuilder) LoadDefinitionsFromEntityFiles() ([]*definitions.EntityD
 
 	// loop over all the entries and prepare the
 	for _, e := range entries {
-		filePath := filepath.Join(entitiesDefinitionsFilePathTemplate, e.Name())
+		filePath := filepath.Join(EntitiesDefinitionsFilePathTemplate, e.Name())
 		file, err := os.OpenFile(filePath, os.O_RDWR, 0644)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create definition entity file: %w", err)
@@ -143,7 +146,7 @@ func (e *EntityBuilder) LoadDefinitionsFromEntityFiles() ([]*definitions.EntityD
 func (e *EntityBuilder) LoadDefinitionByID(id string) (*definitions.EntityDefinition, error) {
 	slugName := slug.CreateSlug(id)
 	filename := fmt.Sprintf("entity_%s.json", slugName)
-	filePath := filepath.Join(entitiesDefinitionsFilePathTemplate, filename)
+	filePath := filepath.Join(EntitiesDefinitionsFilePathTemplate, filename)
 
 	var definition definitions.EntityDefinition
 	if err := e.cw.ReadJSONFromFile(filePath, &definition); err != nil {

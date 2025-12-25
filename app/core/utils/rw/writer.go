@@ -122,3 +122,20 @@ func (cw CustomWriter) EditFile(content, path, filename string) error {
 
 	return writer.Flush()
 }
+
+// DeleteFile deletes a file at the specified path
+// Returns an error if the file doesn't exist or deletion fails
+func (cw CustomWriter) DeleteFile(path, filename string) error {
+	filePath := filepath.Join(path, filename)
+
+	// Check if file exists
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return fmt.Errorf("file does not exist: %s", filePath)
+	}
+
+	if err := os.Remove(filePath); err != nil {
+		return fmt.Errorf("failed to delete file: %w", err)
+	}
+
+	return nil
+}
