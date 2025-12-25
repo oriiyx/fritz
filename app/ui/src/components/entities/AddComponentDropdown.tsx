@@ -1,4 +1,3 @@
-import {useState} from 'react'
 import {ChevronDownIcon, PlusIcon} from '@heroicons/react/24/outline'
 import {DataComponentCategory, DataComponentDefinition} from '@/generated/definitions'
 
@@ -8,8 +7,6 @@ interface Props {
 }
 
 export function AddComponentDropdown({dataComponentTypes, onAddComponent}: Props) {
-    const [isOpen, setIsOpen] = useState(false)
-
     // Group components by category
     const groupedComponents = dataComponentTypes.reduce(
         (acc, component) => {
@@ -25,7 +22,10 @@ export function AddComponentDropdown({dataComponentTypes, onAddComponent}: Props
 
     const handleSelect = (component: DataComponentDefinition) => {
         onAddComponent(component)
-        setIsOpen(false)
+        // Close dropdown by removing focus
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur()
+        }
     }
 
     const getCategoryLabel = (category: DataComponentCategory): string => {
@@ -48,51 +48,45 @@ export function AddComponentDropdown({dataComponentTypes, onAddComponent}: Props
 
     return (
         <div className="dropdown dropdown-bottom w-full">
-            <button
-                tabIndex={0}
-                onClick={() => setIsOpen(!isOpen)}
-                className="btn btn-primary btn-block gap-2"
-            >
+            <div tabIndex={0} role="button" className="btn btn-primary btn-block gap-2">
                 <PlusIcon className="h-5 w-5"/>
                 Add Component
-                <ChevronDownIcon className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}/>
-            </button>
+                <ChevronDownIcon className="h-4 w-4"/>
+            </div>
 
-            {isOpen && (
-                <ul
-                    tabIndex={0}
-                    className="menu dropdown-content z-[1] mt-2 w-full rounded-box bg-base-100 p-2 shadow-lg"
-                >
-                    {Object.entries(groupedComponents).map(([category, components]) => (
-                        <li key={category}>
-                            {/* Category Header */}
-                            <div className="menu-title flex items-center gap-2">
-                                <span>{getCategoryIcon(category as DataComponentCategory)}</span>
-                                <span>{getCategoryLabel(category as DataComponentCategory)}</span>
-                            </div>
+            <ul
+                tabIndex={-1}
+                className="menu dropdown-content z-[1] mt-2 w-full rounded-box bg-base-100 p-2 shadow-lg"
+            >
+                {Object.entries(groupedComponents).map(([category, components]) => (
+                    <li key={category}>
+                        {/* Category Header */}
+                        <div className="menu-title flex items-center gap-2">
+                            <span>{getCategoryIcon(category as DataComponentCategory)}</span>
+                            <span>{getCategoryLabel(category as DataComponentCategory)}</span>
+                        </div>
 
-                            {/* Components in Category */}
-                            <ul>
-                                {components.map((component) => (
-                                    <li key={component.id}>
-                                        <button
-                                            onClick={() => handleSelect(component)}
-                                            className="flex items-start gap-3"
-                                        >
-                                            <div className="flex-1">
-                                                <div className="font-medium">{component.label}</div>
-                                                <div className="text-xs text-base-content/60">
-                                                    {component.tooltip}
-                                                </div>
+                        {/* Components in Category */}
+                        <ul>
+                            {components.map((component) => (
+                                <li key={component.id}>
+                                    <button
+                                        onClick={() => handleSelect(component)}
+                                        className="flex items-start gap-3"
+                                    >
+                                        <div className="flex-1">
+                                            <div className="font-medium">{component.label}</div>
+                                            <div className="text-xs text-base-content/60">
+                                                {component.tooltip}
                                             </div>
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        </li>
-                    ))}
-                </ul>
-            )}
+                                        </div>
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </li>
+                ))}
+            </ul>
         </div>
     )
 }

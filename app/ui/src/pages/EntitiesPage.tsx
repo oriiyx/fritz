@@ -19,6 +19,7 @@ export function EntitiesPage() {
     const [selectedDefinition, setSelectedDefinition] = useState<EntityDefinition | null>(null)
     const [selectedComponent, setSelectedComponent] = useState<DataComponent | null>(null)
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+    const [validationError, setValidationError] = useState<string | null>(null)
 
     // Fetch entity definitions using React Query
     const {data: entityDefinitions = [], isLoading, error} = useQuery({
@@ -71,6 +72,7 @@ export function EntitiesPage() {
         setSelectedDefinition(definition)
         setSelectedComponent(null)
         setHasUnsavedChanges(false)
+        setValidationError(null)
     }
 
     const handleComponentsReorder = (newComponents: DataComponent[]) => {
@@ -86,6 +88,7 @@ export function EntitiesPage() {
 
         setSelectedDefinition(updatedDefinition)
         setHasUnsavedChanges(true)
+        setValidationError(null)
     }
 
     const handleComponentSelect = (component: DataComponent) => {
@@ -175,10 +178,21 @@ export function EntitiesPage() {
         setSelectedDefinition(updatedDefinition)
         setSelectedComponent(newComponent)
         setHasUnsavedChanges(true)
+        setValidationError(null)
     }
 
     const handleSave = () => {
         if (!selectedDefinition) return
+
+        // Validation: check if at least one component exists
+        if (selectedDefinition.layout.components.length === 0) {
+            setValidationError('Definition must have at least one component before saving')
+            return
+        }
+
+        // Clear validation error
+        setValidationError(null)
+
         saveMutation.mutate(selectedDefinition)
     }
 
@@ -333,7 +347,12 @@ export function EntitiesPage() {
                 <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-base-300 bg-base-100 shadow-lg">
                     <div className="mx-auto flex items-center justify-between px-6 py-4">
                         <div className="flex items-center gap-3">
-                            {hasUnsavedChanges ? (
+                            {validationError ? (
+                                <>
+                                    <span className="badge badge-error">Validation Error</span>
+                                    <span className="text-sm text-error">{validationError}</span>
+                                </>
+                            ) : hasUnsavedChanges ? (
                                 <>
                                     <span className="badge badge-warning">Unsaved Changes</span>
                                     <span className="text-sm text-base-content/70">
