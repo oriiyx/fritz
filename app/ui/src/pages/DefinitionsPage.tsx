@@ -7,13 +7,13 @@ import {Button} from '@/components/Button'
 import {Input} from '@/components/Input'
 import {entitiesApi} from '@/services/entitiesService'
 import {DataComponent, DataComponentDefinition, DataComponentType, EntityDefinition,} from '@/generated/definitions'
-import {EntityList} from '@/components/entities/EntityList.tsx'
-import {ComponentLayoutTree} from '@/components/entities/ComponentLayoutTree'
-import {AddComponentDropdown} from '@/components/entities/AddComponentDropdown'
-import {ComponentSettingsPanel} from '@/components/entities/ComponentSettingsPanel'
+import {EntityList} from '@/components/definitions/EntityList.tsx'
+import {ComponentLayoutTree} from '@/components/definitions/ComponentLayoutTree'
+import {AddComponentDropdown} from '@/components/definitions/AddComponentDropdown'
+import {ComponentSettingsPanel} from '@/components/definitions/ComponentSettingsPanel'
 import {CheckCircleIcon, PlusIcon, XMarkIcon} from '@heroicons/react/24/outline'
 
-export function EntitiesPage() {
+export function DefinitionsPage() {
     const queryClient = useQueryClient()
 
     // Local state management
