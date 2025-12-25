@@ -32,6 +32,23 @@ export const entitiesApi = {
         }
     },
 
+    // Create new entity definition
+    createEntityDefinition: async (
+        definition: EntityDefinition
+    ): Promise<EntityDefinition> => {
+        try {
+            const response = await apiClient.post<EntityDefinition>(
+                '/api/v1/definitions/create',
+                definition
+            )
+            return response.data
+        } catch (error: unknown) {
+            const errorDetails = getErrorDetails(error)
+            console.error('Create entity definition error:', errorDetails)
+            throw new Error(getErrorMessage(error))
+        }
+    },
+
     // Update entity definition
     updateEntityDefinition: async (
         id: string,
