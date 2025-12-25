@@ -10,6 +10,7 @@ import (
 )
 
 const EntitiesTableQueriesFilePathTemplate = "database/fritz"
+const EntitiesAdaptersFilePathTemplate = "app/core/services/entities/adapters"
 
 func (e *EntityBuilder) CreateCrudOperations(tablename string, d *definitions.EntityDefinition) error {
 	queriesName := fmt.Sprintf("queries_%s", d.ID)
@@ -66,7 +67,7 @@ func (e *EntityBuilder) CreateCrudOperations(tablename string, d *definitions.En
 
 	// Now generate the adapter code that bridges JSON -> SQLC
 	adapterCode := e.genAdapterCode(d)
-	adapterFilename := fmt.Sprintf("adapter_%s.go", d.ID)
+	adapterFilename := e.CreateAdapterFileName(d)
 
 	err = e.cw.WriteNewFile(adapterCode, "app/core/services/entities/adapters", adapterFilename)
 	if err != nil {
@@ -79,7 +80,7 @@ func (e *EntityBuilder) CreateCrudOperations(tablename string, d *definitions.En
 		Msg("Generated entity adapter")
 
 	// Update the central loader file
-	err = e.updateAdapterLoader(d)
+	err = e.UpdateAdapterLoader(d)
 	if err != nil {
 		e.logger.Warn().Err(err).Msg("Failed to update adapter loader")
 	}
@@ -87,7 +88,11 @@ func (e *EntityBuilder) CreateCrudOperations(tablename string, d *definitions.En
 	return nil
 }
 
-func (e *EntityBuilder) updateAdapterLoader(d *definitions.EntityDefinition) error {
+func (e *EntityBuilder) CreateAdapterFileName(d *definitions.EntityDefinition) string {
+	return fmt.Sprintf("adapter_%s.go", d.ID)
+}
+
+func (e *EntityBuilder) UpdateAdapterLoader(d *definitions.EntityDefinition) error {
 	entityDefinitions, err := e.LoadDefinitionsFromEntityFiles()
 	if err != nil {
 		return err

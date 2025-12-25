@@ -47,17 +47,6 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	/**
-	TODO:
-		1. Get existing definition
-		2. Check changes from existing definition and new one
-		3. Create UPDATE TABLE dynamic query and run it
-		4. Update the database/schema/entity_*.sql with a fresh schema
-		5. Store definition - reuse the function from the create new definition
-		6. Delete existing CRUD Operations
-		7. Create fresh CRUD Operations with the existing function
-	*/
-
 	// 1. get existing definition
 	existingDefinition, err := h.entityBuilder.LoadDefinitionByID(ID)
 	if err != nil {

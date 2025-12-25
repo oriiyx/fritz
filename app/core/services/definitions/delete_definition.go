@@ -3,6 +3,7 @@ package definitions
 import (
 	"fmt"
 	"net/http"
+	"os/exec"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5"
@@ -12,19 +13,12 @@ import (
 	ctxUtil "github.com/oriiyx/fritz/app/core/utils/ctx"
 )
 
+const SQLCGenerateQueriesPath = "database/generated"
+
 // Delete is an endpoint that handles deleting existing fritz entity
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	reqID := ctxUtil.RequestID(r.Context())
 	ID := chi.URLParam(r, EntityIDKey)
-
-	/**
-	TODO
-		1. Check if definition with the id exists
-		2. Create SQL statements that will delete the entire table from the database
-		3. Find and delete database/fritz/queries_*.sql
-		4. Find and delete database/schema/entity_*.sql
-		5. Find and delete the var/entities/definitions/entity_*.json
-	*/
 
 	// 1. get existing definition
 	definition, err := h.entityBuilder.LoadDefinitionByID(ID)
@@ -53,8 +47,16 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 4. Find and delete database/schema/entity_*.sql
+	// 4.1 Find and delete database/schema/entity_*.sql
 	err = h.CustomWriter.DeleteFile(entity_builder.EntitiesTableSchemaFilePathTemplate, fmt.Sprintf("%s.sql", tablename))
+	if err != nil {
+		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msgf("Failed to delete schema from %s", entity_builder.EntitiesTableSchemaFilePathTemplate)
+		errhandler.ServerError(w, errhandler.RespDBDataRemoveFailure)
+		return
+	}
+
+	// 4.2 Find and delete database/generated/queries_*.sql.go
+	err = h.CustomWriter.DeleteFile(SQLCGenerateQueriesPath, fmt.Sprintf("queries_%s.sql.go", definition.ID))
 	if err != nil {
 		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msgf("Failed to delete schema from %s", entity_builder.EntitiesTableSchemaFilePathTemplate)
 		errhandler.ServerError(w, errhandler.RespDBDataRemoveFailure)
@@ -69,6 +71,40 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		errhandler.ServerError(w, errhandler.RespDBDataRemoveFailure)
 		return
 	}
+
+	// 6. Delete adaption code from app/core/services/entities/adapters
+	adapterFilename := h.entityBuilder.CreateAdapterFileName(definition)
+	err = h.CustomWriter.DeleteFile(entity_builder.EntitiesAdaptersFilePathTemplate, adapterFilename)
+	if err != nil {
+		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msgf("Failed to delete adapter code from %s", entity_builder.EntitiesAdaptersFilePathTemplate)
+		errhandler.ServerError(w, errhandler.RespDBDataRemoveFailure)
+		return
+	}
+
+	// 7. Update loader file
+	err = h.entityBuilder.UpdateAdapterLoader(definition)
+	if err != nil {
+		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msg("Failed to update adapter loader file")
+		errhandler.ServerError(w, errhandler.RespDBDataRemoveFailure)
+		return
+	}
+
+	// 8. Run sqlc generate
+	cmd := exec.Command("sqlc", "generate")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		h.Logger.Error().
+			Err(err).
+			Str(l.KeyReqID, reqID).Str("definition_id", ID).
+			Str("output", string(output)).
+			Msg("SQLC generate failed while trying to delete the definition")
+		errhandler.ServerError(w, errhandler.RespDBDataRemoveFailure)
+		return
+	}
+
+	h.Logger.Info().
+		Str("entity_id", definition.ID).
+		Msg("SQLC generation completed successfully")
 
 	w.WriteHeader(http.StatusOK)
 }
