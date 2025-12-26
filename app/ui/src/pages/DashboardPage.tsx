@@ -44,11 +44,11 @@ export function DashboardPage() {
                 <CardBody>
                     <CardTitle>Quick Actions</CardTitle>
                     <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        <Button variant="primary" outline iconLeft={<CubeIcon className="h-5 w-5"/>}
-                                onClick={() => navigate({to: '/entities'})}>
+                        <Button variant="primary" outline iconLeft={<CubeIcon className="h-5 w-5"/>}>
                             Create Entity
                         </Button>
-                        <Button variant="secondary" outline iconLeft={<DocumentTextIcon className="h-5 w-5"/>}>
+                        <Button variant="secondary" outline iconLeft={<DocumentTextIcon className="h-5 w-5"/>}
+                                onClick={() => navigate({to: '/definitions'})}>
                             New Definition
                         </Button>
                         <Button variant="accent" outline iconLeft={<UsersIcon className="h-5 w-5"/>}>
