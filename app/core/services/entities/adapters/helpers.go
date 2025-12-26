@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// String helpers - existing ones remain the same
 func mustGetString(data map[string]interface{}, key string) string {
 	v, ok := data[key]
 	if !ok {
@@ -46,6 +47,7 @@ func getPgText(data map[string]interface{}, key string) pgtype.Text {
 	return pgtype.Text{String: s, Valid: true}
 }
 
+// Integer helpers - mandatory (NOT NULL)
 func mustGetInt32(data map[string]interface{}, key string) int32 {
 	v, ok := data[key]
 	if !ok {
@@ -86,6 +88,101 @@ func mustGetInt64(data map[string]interface{}, key string) int64 {
 	}
 }
 
+func mustGetInt16(data map[string]interface{}, key string) int16 {
+	v, ok := data[key]
+	if !ok {
+		panic(fmt.Sprintf("missing required field: %s", key))
+	}
+
+	switch val := v.(type) {
+	case float64:
+		return int16(val)
+	case int:
+		return int16(val)
+	case int16:
+		return val
+	case int32:
+		return int16(val)
+	case int64:
+		return int16(val)
+	default:
+		panic(fmt.Sprintf("field %s must be numeric, got %T", key, v))
+	}
+}
+
+// Integer helpers - nullable (pgtype.Int4, pgtype.Int8, pgtype.Int2)
+func getPgInt4(data map[string]interface{}, key string) pgtype.Int4 {
+	v, ok := data[key]
+	if !ok || v == nil {
+		return pgtype.Int4{Valid: false}
+	}
+
+	var intVal int32
+	switch val := v.(type) {
+	case float64:
+		intVal = int32(val)
+	case int:
+		intVal = int32(val)
+	case int32:
+		intVal = val
+	case int64:
+		intVal = int32(val)
+	default:
+		return pgtype.Int4{Valid: false}
+	}
+
+	return pgtype.Int4{Int32: intVal, Valid: true}
+}
+
+func getPgInt8(data map[string]interface{}, key string) pgtype.Int8 {
+	v, ok := data[key]
+	if !ok || v == nil {
+		return pgtype.Int8{Valid: false}
+	}
+
+	var intVal int64
+	switch val := v.(type) {
+	case float64:
+		intVal = int64(val)
+	case int:
+		intVal = int64(val)
+	case int32:
+		intVal = int64(val)
+	case int64:
+		intVal = val
+	default:
+		return pgtype.Int8{Valid: false}
+	}
+
+	return pgtype.Int8{Int64: intVal, Valid: true}
+}
+
+func getPgInt2(data map[string]interface{}, key string) pgtype.Int2 {
+	v, ok := data[key]
+	if !ok || v == nil {
+		return pgtype.Int2{Valid: false}
+	}
+
+	var intVal int16
+	switch val := v.(type) {
+	case float64:
+		intVal = int16(val)
+	case int:
+		intVal = int16(val)
+	case int16:
+		intVal = val
+	case int32:
+		intVal = int16(val)
+	case int64:
+		intVal = int16(val)
+	default:
+		return pgtype.Int2{Valid: false}
+	}
+
+	return pgtype.Int2{Int16: intVal, Valid: true}
+}
+
+// Boolean helpers
 func mustGetBool(data map[string]interface{}, key string) bool {
 	v, ok := data[key]
 	if !ok {
@@ -98,6 +195,21 @@ func mustGetBool(data map[string]interface{}, key string) bool {
 	return b
 }
 
+func getPgBool(data map[string]interface{}, key string) pgtype.Bool {
+	v, ok := data[key]
+	if !ok || v == nil {
+		return pgtype.Bool{Valid: false}
+	}
+
+	b, ok := v.(bool)
+	if !ok {
+		return pgtype.Bool{Valid: false}
+	}
+
+	return pgtype.Bool{Bool: b, Valid: true}
+}
+
+// Date/Time helpers
 func getPgDate(data map[string]interface{}, key string) pgtype.Date {
 	v, ok := data[key]
 	if !ok || v == nil {

@@ -1,4 +1,4 @@
-package entity_builder
+package definition_builder
 
 import (
 	"reflect"
@@ -13,7 +13,7 @@ type ComponentChangeset struct {
 	Unchanged []definitions.DataComponent
 }
 
-func (e *EntityBuilder) CompareDefinitions(existing, new *definitions.EntityDefinition) (*ComponentChangeset, error) {
+func (e *Builder) CompareDefinitions(existing, new *definitions.EntityDefinition) (*ComponentChangeset, error) {
 	changeset := ComponentChangeset{
 		Added:     make([]definitions.DataComponent, 0),
 		Removed:   make([]definitions.DataComponent, 0),
@@ -53,7 +53,7 @@ func (e *EntityBuilder) CompareDefinitions(existing, new *definitions.EntityDefi
 	return &changeset, nil
 }
 
-func (e *EntityBuilder) CompareComponents(existing, new *definitions.DataComponent, changeset *ComponentChangeset) {
+func (e *Builder) CompareComponents(existing, new *definitions.DataComponent, changeset *ComponentChangeset) {
 	// handle unchanged
 	areEqual := reflect.DeepEqual(new, existing)
 	if areEqual {

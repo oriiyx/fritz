@@ -1,4 +1,4 @@
-package entity_builder
+package definition_builder
 
 import (
 	"context"
@@ -14,7 +14,7 @@ type TableChangeset struct {
 	Modified strings.Builder
 }
 
-func (e *EntityBuilder) UpdateTableFromChangeset(changeset *ComponentChangeset, tablename string, ctx context.Context) error {
+func (e *Builder) UpdateTableFromChangeset(changeset *ComponentChangeset, tablename string, ctx context.Context) error {
 	tc := e.CreateTableChangesetBasis(tablename)
 
 	// handle adding new columns to the table
@@ -115,7 +115,7 @@ func (e *EntityBuilder) UpdateTableFromChangeset(changeset *ComponentChangeset, 
 	return nil
 }
 
-func (e *EntityBuilder) CreateTableChangesetBasis(tablename string) *TableChangeset {
+func (e *Builder) CreateTableChangesetBasis(tablename string) *TableChangeset {
 	tc := &TableChangeset{}
 	prefix := e.generatePrefix(tablename)
 
@@ -126,6 +126,6 @@ func (e *EntityBuilder) CreateTableChangesetBasis(tablename string) *TableChange
 	return tc
 }
 
-func (e *EntityBuilder) generatePrefix(tablename string) string {
+func (e *Builder) generatePrefix(tablename string) string {
 	return fmt.Sprintf("ALTER TABLE IF EXISTS %s ", tablename)
 }

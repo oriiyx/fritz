@@ -7,8 +7,8 @@ import (
 	"github.com/oriiyx/fritz/app/core/api/base"
 	"github.com/oriiyx/fritz/app/core/api/common/errhandler"
 	l "github.com/oriiyx/fritz/app/core/api/common/log"
+	"github.com/oriiyx/fritz/app/core/services/objects/definition_builder"
 	"github.com/oriiyx/fritz/app/core/services/objects/definitions"
-	"github.com/oriiyx/fritz/app/core/services/objects/entity_builder"
 	ctxUtil "github.com/oriiyx/fritz/app/core/utils/ctx"
 	validatorUtil "github.com/oriiyx/fritz/app/core/utils/validator"
 )
@@ -16,13 +16,13 @@ import (
 type Handler struct {
 	*base.HandlerController
 
-	entityBuilder *entity_builder.EntityBuilder
+	entityBuilder *definition_builder.Builder
 }
 
 const EntityIDKey = "id"
 
 func NewDefinitionsHandler(ctrl *base.HandlerController) *Handler {
-	eb := entity_builder.NewEntityBuilder(ctrl.Logger, ctrl.DB, ctrl.CustomWriter)
+	eb := definition_builder.NewDefinitionsBuilder(ctrl.Logger, ctrl.DB, ctrl.CustomWriter)
 
 	return &Handler{
 		HandlerController: ctrl,

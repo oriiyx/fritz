@@ -1,4 +1,4 @@
-package entity_builder
+package definition_builder
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 const EntitiesTableSchemaFilePathTemplate = "database/schema"
 
-func (e *EntityBuilder) CreateEntityTable(ctx context.Context, definition *definitions.EntityDefinition) (string, error) {
+func (e *Builder) CreateEntityTable(ctx context.Context, definition *definitions.EntityDefinition) (string, error) {
 	tableName := e.CreateEntityTableName(definition)
 
 	// Build CREATE TABLE statement from definition.Layout.Components
@@ -44,7 +44,7 @@ func (e *EntityBuilder) CreateEntityTable(ctx context.Context, definition *defin
 	return tableName, nil
 }
 
-func (e *EntityBuilder) CreateEntityTableName(definition *definitions.EntityDefinition) string {
+func (e *Builder) CreateEntityTableName(definition *definitions.EntityDefinition) string {
 	tableName := fmt.Sprintf("entity_%s", definition.ID)
 	return tableName
 }

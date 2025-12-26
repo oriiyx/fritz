@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/oriiyx/fritz/app/core/api/common/errhandler"
 	l "github.com/oriiyx/fritz/app/core/api/common/log"
-	"github.com/oriiyx/fritz/app/core/services/objects/entity_builder"
+	"github.com/oriiyx/fritz/app/core/services/objects/definition_builder"
 	ctxUtil "github.com/oriiyx/fritz/app/core/utils/ctx"
 )
 
@@ -40,17 +40,17 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	// 3. Find and delete database/fritz/queries_*.sql
 	queriesName := fmt.Sprintf("queries_%s.sql", definition.ID)
-	err = h.CustomWriter.DeleteFile(entity_builder.EntitiesTableQueriesFilePathTemplate, queriesName)
+	err = h.CustomWriter.DeleteFile(definition_builder.EntitiesTableQueriesFilePathTemplate, queriesName)
 	if err != nil {
-		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msgf("Failed to delete queries from %s", entity_builder.EntitiesTableQueriesFilePathTemplate)
+		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msgf("Failed to delete queries from %s", definition_builder.EntitiesTableQueriesFilePathTemplate)
 		errhandler.ServerError(w, errhandler.RespDBDataRemoveFailure)
 		return
 	}
 
 	// 4.1 Find and delete database/schema/entity_*.sql
-	err = h.CustomWriter.DeleteFile(entity_builder.EntitiesTableSchemaFilePathTemplate, fmt.Sprintf("%s.sql", tablename))
+	err = h.CustomWriter.DeleteFile(definition_builder.EntitiesTableSchemaFilePathTemplate, fmt.Sprintf("%s.sql", tablename))
 	if err != nil {
-		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msgf("Failed to delete schema from %s", entity_builder.EntitiesTableSchemaFilePathTemplate)
+		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msgf("Failed to delete schema from %s", definition_builder.EntitiesTableSchemaFilePathTemplate)
 		errhandler.ServerError(w, errhandler.RespDBDataRemoveFailure)
 		return
 	}
@@ -58,25 +58,25 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	// 4.2 Find and delete database/generated/queries_*.sql.go
 	err = h.CustomWriter.DeleteFile(SQLCGenerateQueriesPath, fmt.Sprintf("queries_%s.sql.go", definition.ID))
 	if err != nil {
-		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msgf("Failed to delete schema from %s", entity_builder.EntitiesTableSchemaFilePathTemplate)
+		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msgf("Failed to delete schema from %s", definition_builder.EntitiesTableSchemaFilePathTemplate)
 		errhandler.ServerError(w, errhandler.RespDBDataRemoveFailure)
 		return
 	}
 
 	// 5. Find and delete the var/entities/definitions/entity_*.json
 	filename := h.entityBuilder.CreateEntityDefinitionFileName(definition)
-	err = h.CustomWriter.DeleteFile(entity_builder.EntitiesDefinitionsFilePathTemplate, filename)
+	err = h.CustomWriter.DeleteFile(definition_builder.EntitiesDefinitionsFilePathTemplate, filename)
 	if err != nil {
-		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msgf("Failed to delete json from %s", entity_builder.EntitiesDefinitionsFilePathTemplate)
+		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msgf("Failed to delete json from %s", definition_builder.EntitiesDefinitionsFilePathTemplate)
 		errhandler.ServerError(w, errhandler.RespDBDataRemoveFailure)
 		return
 	}
 
 	// 6. Delete adaption code from app/core/services/entities/adapters
 	adapterFilename := h.entityBuilder.CreateAdapterFileName(definition)
-	err = h.CustomWriter.DeleteFile(entity_builder.EntitiesAdaptersFilePathTemplate, adapterFilename)
+	err = h.CustomWriter.DeleteFile(definition_builder.EntitiesAdaptersFilePathTemplate, adapterFilename)
 	if err != nil {
-		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msgf("Failed to delete adapter code from %s", entity_builder.EntitiesAdaptersFilePathTemplate)
+		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msgf("Failed to delete adapter code from %s", definition_builder.EntitiesAdaptersFilePathTemplate)
 		errhandler.ServerError(w, errhandler.RespDBDataRemoveFailure)
 		return
 	}

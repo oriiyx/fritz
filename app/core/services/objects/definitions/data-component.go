@@ -109,29 +109,47 @@ func (dc *DataComponent) ToColumnDefinition() string {
 }
 
 // GetGoType returns the Go type that SQLC generates based on DB type and nullability
+// when using pgx/v5 driver (which is what Fritz uses)
 func (dc *DataComponent) GetGoType() string {
-	// SQLC generates string for NOT NULL text types, pgtype.Text for nullable
 	switch dc.DBType {
 	case DataTypeVarchar, DataTypeText, DataTypeChar:
 		if dc.Mandatory {
 			return "string"
 		}
 		return "pgtype.Text"
+
 	case DataTypeInteger:
-		return "int32"
-	case DataTypeBigInt:
-		return "int64"
-	case DataTypeSmallInt:
-		return "int16"
-	case DataTypeBoolean:
-		return "bool"
-	case DataTypeDate:
 		if dc.Mandatory {
-			return "pgtype.Date"
+			return "int32"
 		}
+		return "pgtype.Int4"
+
+	case DataTypeBigInt:
+		if dc.Mandatory {
+			return "int64"
+		}
+		return "pgtype.Int8"
+
+	case DataTypeSmallInt:
+		if dc.Mandatory {
+			return "int16"
+		}
+		return "pgtype.Int2"
+
+	case DataTypeBoolean:
+		if dc.Mandatory {
+			return "bool"
+		}
+		return "pgtype.Bool"
+
+	case DataTypeDate:
+		// Date is always pgtype.Date regardless of nullability
 		return "pgtype.Date"
+
 	case DataTypeTimestamp, DataTypeTimestampTZ:
+		// Timestamp types are always pgtype.Timestamptz
 		return "pgtype.Timestamptz"
+
 	default:
 		return "string"
 	}

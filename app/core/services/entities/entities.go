@@ -2,7 +2,7 @@ package entities
 
 import (
 	"github.com/oriiyx/fritz/app/core/api/base"
-	"github.com/oriiyx/fritz/app/core/services/objects/entity_builder"
+	"github.com/oriiyx/fritz/app/core/services/objects/definition_builder"
 )
 
 const (
@@ -12,11 +12,11 @@ const (
 type Handler struct {
 	*base.HandlerController
 
-	entityBuilder *entity_builder.EntityBuilder
+	entityBuilder *definition_builder.Builder
 }
 
 func NewEntitiesHandler(ctrl *base.HandlerController) *Handler {
-	eb := entity_builder.NewEntityBuilder(ctrl.Logger, ctrl.DB, ctrl.CustomWriter)
+	eb := definition_builder.NewDefinitionsBuilder(ctrl.Logger, ctrl.DB, ctrl.CustomWriter)
 
 	return &Handler{
 		HandlerController: ctrl,

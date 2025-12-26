@@ -1,4 +1,4 @@
-package entity_builder
+package definition_builder
 
 import (
 	"encoding/json"
@@ -15,14 +15,14 @@ import (
 
 const EntitiesDefinitionsFilePathTemplate = "var/entities/definitions"
 
-type EntityBuilder struct {
+type Builder struct {
 	db     *pgxpool.Pool
 	cw     *rw.CustomWriter
 	logger *zerolog.Logger
 }
 
-func NewEntityBuilder(logger *zerolog.Logger, db *pgxpool.Pool, cw *rw.CustomWriter) *EntityBuilder {
-	return &EntityBuilder{
+func NewDefinitionsBuilder(logger *zerolog.Logger, db *pgxpool.Pool, cw *rw.CustomWriter) *Builder {
+	return &Builder{
 		db:     db,
 		cw:     cw,
 		logger: logger,
@@ -36,7 +36,7 @@ func NewEntityBuilder(logger *zerolog.Logger, db *pgxpool.Pool, cw *rw.CustomWri
 // [ ] - Duplicate Name
 //
 // [ ] - Duplicate Component Names
-func (e *EntityBuilder) ValidateNewDefinition(definition *definitions.EntityDefinition) ([]byte, error) {
+func (e *Builder) ValidateNewDefinition(definition *definitions.EntityDefinition) ([]byte, error) {
 	existingDefinitions, err := e.LoadDefinitionsFromEntityFiles()
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (e *EntityBuilder) ValidateNewDefinition(definition *definitions.EntityDefi
 // ValidateExistingDefinition validates definition points that touch only core of the definition
 //
 // [ ] - Duplicate Component Names
-func (e *EntityBuilder) ValidateExistingDefinition(definition *definitions.EntityDefinition) ([]byte, error) {
+func (e *Builder) ValidateExistingDefinition(definition *definitions.EntityDefinition) ([]byte, error) {
 	// Check for duplicated component names
 	componentNames := make(map[string]bool, 1)
 	for _, component := range definition.Layout.Components {
@@ -81,7 +81,7 @@ func (e *EntityBuilder) ValidateExistingDefinition(definition *definitions.Entit
 	return nil, nil
 }
 
-func (e *EntityBuilder) StoreDefinitionIntoEntityFile(definition *definitions.EntityDefinition) error {
+func (e *Builder) StoreDefinitionIntoEntityFile(definition *definitions.EntityDefinition) error {
 	filename := e.CreateEntityDefinitionFileName(definition)
 
 	// First create directory
@@ -106,11 +106,11 @@ func (e *EntityBuilder) StoreDefinitionIntoEntityFile(definition *definitions.En
 	return nil
 }
 
-func (e *EntityBuilder) CreateEntityDefinitionFileName(definition *definitions.EntityDefinition) string {
+func (e *Builder) CreateEntityDefinitionFileName(definition *definitions.EntityDefinition) string {
 	return fmt.Sprintf("entity_%s.json", slug.CreateSlug(definition.ID))
 }
 
-func (e *EntityBuilder) LoadDefinitionsFromEntityFiles() ([]*definitions.EntityDefinition, error) {
+func (e *Builder) LoadDefinitionsFromEntityFiles() ([]*definitions.EntityDefinition, error) {
 	// load all the entity files that are stored
 	entries, err := os.ReadDir(EntitiesDefinitionsFilePathTemplate)
 	if err != nil {
@@ -143,7 +143,7 @@ func (e *EntityBuilder) LoadDefinitionsFromEntityFiles() ([]*definitions.EntityD
 }
 
 // LoadDefinitionByID loads a specific entity definition by its ID
-func (e *EntityBuilder) LoadDefinitionByID(id string) (*definitions.EntityDefinition, error) {
+func (e *Builder) LoadDefinitionByID(id string) (*definitions.EntityDefinition, error) {
 	slugName := slug.CreateSlug(id)
 	filename := fmt.Sprintf("entity_%s.json", slugName)
 	filePath := filepath.Join(EntitiesDefinitionsFilePathTemplate, filename)
