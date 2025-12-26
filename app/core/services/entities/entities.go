@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	ClassIDKey = "class_id"
+	DefinitionIDKey = "definition_id"
 )
 
 type Handler struct {

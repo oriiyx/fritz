@@ -26,7 +26,7 @@ type CreateEntityRequest struct {
 // CreateEntity creates a new entity instance
 func (h *Handler) CreateEntity(w http.ResponseWriter, r *http.Request) {
 	reqID := ctxUtil.RequestID(r.Context())
-	classID := chi.URLParam(r, ClassIDKey)
+	classID := chi.URLParam(r, DefinitionIDKey)
 
 	var req CreateEntityRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

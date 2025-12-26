@@ -20,7 +20,7 @@ type ReadEntityRequest struct {
 // ReadEntity is an endpoint that handles reading entity
 func (h *Handler) ReadEntity(w http.ResponseWriter, r *http.Request) {
 	reqID := ctxUtil.RequestID(r.Context())
-	classID := chi.URLParam(r, ClassIDKey)
+	classID := chi.URLParam(r, DefinitionIDKey)
 
 	var req ReadEntityRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
