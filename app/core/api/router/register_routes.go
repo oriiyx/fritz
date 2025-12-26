@@ -37,10 +37,10 @@ func (c *Controller) RegisterRoutes() {
 
 		entitiesHandler := entities.NewEntitiesHandler(handlerFactory.Create("entities"))
 		r.Route("/entities", func(entities chi.Router) {
-			entities.Method(http.MethodPost, "/{class_id}/read", requestlog.NewHandler(entitiesHandler.ReadEntity, c.Logger))
-			entities.Method(http.MethodPost, "/{class_id}/create", requestlog.NewHandler(entitiesHandler.CreateEntity, c.Logger))
-			entities.Method(http.MethodPost, "/{class_id}/update", requestlog.NewHandler(entitiesHandler.UpdateEntity, c.Logger))
-			entities.Method(http.MethodPost, "/{class_id}/delete", requestlog.NewHandler(entitiesHandler.DeleteEntity, c.Logger))
+			entities.Method(http.MethodPost, "/{definition_id}/read", requestlog.NewHandler(entitiesHandler.ReadEntity, c.Logger))
+			entities.Method(http.MethodPost, "/{definition_id}/create", requestlog.NewHandler(entitiesHandler.CreateEntity, c.Logger))
+			entities.Method(http.MethodPost, "/{definition_id}/update", requestlog.NewHandler(entitiesHandler.UpdateEntity, c.Logger))
+			entities.Method(http.MethodPost, "/{definition_id}/delete", requestlog.NewHandler(entitiesHandler.DeleteEntity, c.Logger))
 		})
 
 		r.Group(func(protectedRouter chi.Router) {
