@@ -1,46 +1,10 @@
-import {Link} from '@tanstack/react-router'
-import {Cog6ToothIcon, CubeIcon, DocumentTextIcon, HomeIcon, UsersIcon,} from '@heroicons/react/24/outline'
-import {ComponentType} from "react";
-
-interface NavItem {
-    name: string
-    path: string
-    icon: ComponentType<{ className?: string }>
-}
-
-const navItems: NavItem[] = [
-    {name: 'Dashboard', path: '/', icon: HomeIcon},
-    {name: 'Entities', path: '/entities', icon: CubeIcon},
-    {name: 'Definitions', path: '/definitions', icon: DocumentTextIcon},
-    {name: 'Users', path: '/users', icon: UsersIcon},
-    {name: 'Settings', path: '/settings', icon: Cog6ToothIcon},
-]
-
 export function Sidebar() {
     return (
-        <aside className="menu min-h-full w-48 bg-base-300/20 py-4 px-1 text-base-content">
-            <div className="mb-4">
-                <h2 className="px-4 text-lg font-semibold">Navigation</h2>
+        <aside className="min-h-full w-48 bg-base-300/20 py-4 px-1 text-base-content">
+            {/* Reserved for future tree view functionality */}
+            <div className="px-4 py-2 text-sm text-base-content/50">
+                Tree view coming soon...
             </div>
-            <ul>
-                {navItems.map((item) => {
-                    const Icon = item.icon
-                    return (
-                        <li key={item.path}>
-                            <Link
-                                to={item.path}
-                                activeProps={{
-                                    className: 'active',
-                                }}
-                                className="flex items-center gap-3"
-                            >
-                                <Icon className="h-5 w-5"/>
-                                <span>{item.name}</span>
-                            </Link>
-                        </li>
-                    )
-                })}
-            </ul>
         </aside>
     )
 }

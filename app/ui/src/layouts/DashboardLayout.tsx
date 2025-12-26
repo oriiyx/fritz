@@ -30,18 +30,14 @@ export function DashboardLayout() {
     }, [user, setUser])
 
     return (
-        <div className="drawer lg:drawer-open">
-            <input id="sidebar-drawer" type="checkbox" className="drawer-toggle"/>
-            <div className="drawer-content flex flex-col">
-                <Header/>
+        <div className="flex h-screen">
+            <Sidebar />
+            <div className="flex flex-1 flex-col">
+                <Header />
                 <main className="flex-1 overflow-y-auto bg-base-100 p-4">
-                    <Outlet/>
+                    <Outlet />
                 </main>
-                <Footer/>
-            </div>
-            <div className="drawer-side">
-                <label htmlFor="sidebar-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
-                <Sidebar/>
+                <Footer />
             </div>
         </div>
     )
