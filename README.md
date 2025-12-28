@@ -25,7 +25,3 @@ MIT License - see [LICENSE](LICENSE) for details
 ## Acknowledgments
 
 Inspired by Pimcore's flexible data modeling while embracing Go's philosophy of simplicity and performance.
-
----
-
-**Built with 🛠️️in Go**
