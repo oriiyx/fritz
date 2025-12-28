@@ -21,7 +21,7 @@ type Handler struct {
 
 const EntityIDKey = "id"
 
-func NewDefinitionsHandler(ctrl *base.HandlerController) *Handler {
+func New(ctrl *base.HandlerController) *Handler {
 	eb := definition_builder.NewDefinitionsBuilder(ctrl.Logger, ctrl.DB, ctrl.CustomWriter)
 
 	return &Handler{

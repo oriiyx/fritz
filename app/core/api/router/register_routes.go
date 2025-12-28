@@ -10,6 +10,7 @@ import (
 	"github.com/oriiyx/fritz/app/core/services/auth"
 	defHandler "github.com/oriiyx/fritz/app/core/services/definitions"
 	"github.com/oriiyx/fritz/app/core/services/entities"
+	"github.com/oriiyx/fritz/app/core/services/entities/tree"
 )
 
 func (c *Controller) RegisterRoutes() {
@@ -26,7 +27,7 @@ func (c *Controller) RegisterRoutes() {
 		r.Method(http.MethodGet, "/auth/{provider}/callback", requestlog.NewHandler(authHandler.ProviderCallback, c.Logger))
 		r.Method(http.MethodGet, "/auth/{provider}/logout", requestlog.NewHandler(authHandler.ProviderLogout, c.Logger))
 
-		definitionsHandler := defHandler.NewDefinitionsHandler(handlerFactory.Create("definitions"))
+		definitionsHandler := defHandler.New(handlerFactory.Create("definitions"))
 		r.Route("/definitions", func(definitions chi.Router) {
 			definitions.Method(http.MethodGet, "/", requestlog.NewHandler(definitionsHandler.GetExisting, c.Logger))
 			definitions.Method(http.MethodGet, "/data-component-types", requestlog.NewHandler(definitionsHandler.GetDataComponentTypes, c.Logger))
@@ -35,12 +36,17 @@ func (c *Controller) RegisterRoutes() {
 			definitions.Method(http.MethodDelete, "/{id}/delete", requestlog.NewHandler(definitionsHandler.Delete, c.Logger))
 		})
 
-		entitiesHandler := entities.NewEntitiesHandler(handlerFactory.Create("entities"))
+		entitiesHandler := entities.New(handlerFactory.Create("entities"))
+		treeHandler := tree.New(handlerFactory.Create("tree"))
 		r.Route("/entities", func(entities chi.Router) {
 			entities.Method(http.MethodPost, "/{definition_id}/read", requestlog.NewHandler(entitiesHandler.ReadEntity, c.Logger))
 			entities.Method(http.MethodPost, "/{definition_id}/create", requestlog.NewHandler(entitiesHandler.CreateEntity, c.Logger))
 			entities.Method(http.MethodPost, "/{definition_id}/update", requestlog.NewHandler(entitiesHandler.UpdateEntity, c.Logger))
 			entities.Method(http.MethodPost, "/{definition_id}/delete", requestlog.NewHandler(entitiesHandler.DeleteEntity, c.Logger))
+
+			entities.Route("/tree", func(tree chi.Router) {
+				tree.Method(http.MethodPost, "/children", requestlog.NewHandler(treeHandler.Children, c.Logger))
+			})
 		})
 
 		r.Group(func(protectedRouter chi.Router) {

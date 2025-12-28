@@ -134,6 +134,179 @@ func (q *Queries) GetEntityByPath(ctx context.Context, arg GetEntityByPathParams
 	return i, err
 }
 
+const getEntityChildren = `-- name: GetEntityChildren :many
+SELECT e.id,
+       e.entity_class,
+       e.parent_id,
+       e.o_key,
+       e.o_path,
+       e.o_type,
+       e.published,
+       e.created_at,
+       e.updated_at,
+       -- Subquery to check if this entity has children
+       EXISTS(SELECT 1
+              FROM entities c
+              WHERE c.parent_id = e.id
+              LIMIT 1)                                            as has_children,
+       -- Count of children (useful for UI)
+       (SELECT COUNT(*) FROM entities c WHERE c.parent_id = e.id) as children_count
+FROM entities e
+WHERE e.parent_id = $1
+ORDER BY
+    -- Folders first, then objects, then variants
+    CASE e.o_type
+        WHEN 'folder' THEN 1
+        WHEN 'object' THEN 2
+        WHEN 'variant' THEN 3
+        END,
+    e.o_key ASC
+LIMIT $2 OFFSET $3
+`
+
+type GetEntityChildrenParams struct {
+	ParentID pgtype.UUID
+	Limit    int32
+	Offset   int32
+}
+
+type GetEntityChildrenRow struct {
+	ID            pgtype.UUID
+	EntityClass   string
+	ParentID      pgtype.UUID
+	OKey          string
+	OPath         string
+	OType         string
+	Published     bool
+	CreatedAt     pgtype.Timestamptz
+	UpdatedAt     pgtype.Timestamptz
+	HasChildren   bool
+	ChildrenCount int64
+}
+
+// Get direct children of a parent entity with pagination
+// noinspection SqlResolve
+//
+//	AND ($2::text IS NULL OR e.entity_class = $2) -- TODO - potential improvement - Optional class filter
+//	AND ($3::text IS NULL OR e.o_type = $3)       -- TODO - potential improvement - Optional type filter
+func (q *Queries) GetEntityChildren(ctx context.Context, arg GetEntityChildrenParams) ([]GetEntityChildrenRow, error) {
+	rows, err := q.db.Query(ctx, getEntityChildren, arg.ParentID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetEntityChildrenRow{}
+	for rows.Next() {
+		var i GetEntityChildrenRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.EntityClass,
+			&i.ParentID,
+			&i.OKey,
+			&i.OPath,
+			&i.OType,
+			&i.Published,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.HasChildren,
+			&i.ChildrenCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getEntityChildrenCount = `-- name: GetEntityChildrenCount :one
+SELECT COUNT(*)
+FROM entities e
+WHERE e.parent_id = $1
+`
+
+// Get total count of children (for pagination metadata)
+// noinspection SqlResolve
+func (q *Queries) GetEntityChildrenCount(ctx context.Context, parentID pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, getEntityChildrenCount, parentID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getEntityPath = `-- name: GetEntityPath :many
+
+WITH RECURSIVE entity_path AS (
+    -- Start with the target entity
+    SELECT id,
+           parent_id,
+           o_key,
+           o_path,
+           o_type,
+           0 as depth
+    FROM entities
+    WHERE entities.id = $1
+
+    UNION ALL
+
+    -- Recursively get parents
+    SELECT e.id,
+           e.parent_id,
+           e.o_key,
+           e.o_path,
+           e.o_type,
+           ep.depth + 1
+    FROM entities e
+             INNER JOIN entity_path ep ON e.id = ep.parent_id)
+SELECT id, parent_id, o_key, o_path, o_type, depth
+FROM entity_path
+ORDER BY depth DESC
+`
+
+type GetEntityPathRow struct {
+	ID       pgtype.UUID
+	ParentID pgtype.UUID
+	OKey     string
+	OPath    string
+	OType    string
+	Depth    int32
+}
+
+//	AND ($2::text IS NULL OR e.entity_class = $2) - todo
+//	AND ($3::text IS NULL OR e.o_type = $3); - todo
+//
+// Get all ancestors from root to this entity (for breadcrumb)
+// This is the recursive CTE approach
+// noinspection SqlResolve
+func (q *Queries) GetEntityPath(ctx context.Context, id pgtype.UUID) ([]GetEntityPathRow, error) {
+	rows, err := q.db.Query(ctx, getEntityPath, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetEntityPathRow{}
+	for rows.Next() {
+		var i GetEntityPathRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ParentID,
+			&i.OKey,
+			&i.OPath,
+			&i.OType,
+			&i.Depth,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateEntity = `-- name: UpdateEntity :one
 UPDATE entities
 SET parent_id  = $1,

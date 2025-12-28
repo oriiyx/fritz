@@ -21,16 +21,31 @@ CREATE TABLE IF NOT EXISTS entities
 );
 
 -- Index for efficient parent-child queries
-CREATE INDEX idx_entities_parent_id ON entities (parent_id);
+CREATE INDEX IF NOT EXISTS idx_entities_parent_id ON entities (parent_id);
 
 -- Index for path-based queries (finding all entities under a path)
-CREATE INDEX idx_entities_o_path ON entities (o_path);
+CREATE INDEX IF NOT EXISTS idx_entities_o_path ON entities (o_path);
 
 -- Index for filtering by entity class
-CREATE INDEX idx_entities_entity_class ON entities (entity_class);
+CREATE INDEX IF NOT EXISTS idx_entities_entity_class ON entities (entity_class);
 
 -- Index for published state queries
-CREATE INDEX idx_entities_published ON entities (published);
+CREATE INDEX IF NOT EXISTS idx_entities_published ON entities (published);
 
 -- Composite index for common query patterns
-CREATE INDEX idx_entities_class_published ON entities (entity_class, published);
+CREATE INDEX IF NOT EXISTS idx_entities_class_published ON entities (entity_class, published);
+
+-- Critical for tree navigation queries
+CREATE INDEX IF NOT EXISTS idx_entities_tree_nav ON entities (parent_id, entity_class, o_type);
+
+-- Insert the root entity that all trees start from
+INSERT INTO entities (id, entity_class, parent_id, o_key, o_path, o_type, published)
+VALUES ('00000000-0000-0000-0000-000000000001'::uuid, -- Fixed UUID for root
+        'system', -- Special class
+        NULL, -- No parent
+        'system', -- Key
+        '/', -- Path is just /
+        'folder', -- It's a folder type
+        true -- Always published
+       )
+ON CONFLICT DO NOTHING;

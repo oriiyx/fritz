@@ -2,7 +2,6 @@ import {
     ArrowRightOnRectangleIcon,
     Bars3Icon,
     Cog6ToothIcon,
-    CubeIcon,
     DocumentTextIcon,
     HomeIcon,
     UserCircleIcon,
@@ -22,7 +21,6 @@ interface NavItem {
 
 const navItems: NavItem[] = [
     {name: 'Dashboard', path: '/', icon: HomeIcon},
-    {name: 'Entities', path: '/entities', icon: CubeIcon},
     {name: 'Definitions', path: '/definitions', icon: DocumentTextIcon},
     {name: 'Users', path: '/users', icon: UsersIcon},
     {name: 'Settings', path: '/settings', icon: Cog6ToothIcon},
@@ -65,7 +63,8 @@ export function Header() {
                             <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
                                 <Bars3Icon className="h-6 w-6"/>
                             </div>
-                            <ul tabIndex={0} className="menu dropdown-content z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow">
+                            <ul tabIndex={0}
+                                className="menu dropdown-content z-[1] mt-3 w-52 rounded-box bg-base-100 p-2 shadow">
                                 <li className="menu-title">
                                     <span>{user.display_name}</span>
                                     <span className="text-xs font-normal">{user.email}</span>
