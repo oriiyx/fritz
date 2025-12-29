@@ -14,8 +14,8 @@ import (
 
 type ChildrenParams struct {
 	Limit        uint   `json:"limit" validate:"required,gt=0,lte=1000"`
-	Offset       uint   `json:"offset" validate:"required"`
-	ParentID     string `json:"parent_id" validate:"required,uuid4"`
+	Offset       int    `json:"offset" validate:"gte=0"`
+	ParentID     string `json:"parent_id" validate:"required,uuid"`
 	DefinitionID string `json:"definition_id,omitempty"`
 }
 
@@ -61,7 +61,7 @@ func (h *Handler) Children(w http.ResponseWriter, r *http.Request) {
 		Offset:   int32(req.Offset),
 	})
 	if err != nil {
-		h.Logger.Error().Str(l.KeyReqID, reqID).Err(err).Str("parent_id", req.ParentID).Uint("limit", req.Limit).Uint("offset", req.Offset).Msg("Failed to fetch tree children")
+		h.Logger.Error().Str(l.KeyReqID, reqID).Err(err).Str("parent_id", req.ParentID).Uint("limit", req.Limit).Int("offset", req.Offset).Msg("Failed to fetch tree children")
 		errhandler.ServerError(w, errhandler.RespDBDataAccessFailure)
 		return
 	}
@@ -71,7 +71,7 @@ func (h *Handler) Children(w http.ResponseWriter, r *http.Request) {
 		Items:   children,
 		Total:   total,
 		Limit:   int(req.Limit),
-		Offset:  int(req.Offset),
+		Offset:  req.Offset,
 		HasMore: (int64(req.Offset) + int64(req.Limit)) < total,
 	})
 }
