@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS entities
     CONSTRAINT unique_entity_path_key UNIQUE (o_path, o_key),
 
     -- Ensure key is URL-safe (no spaces, special chars)
-    CONSTRAINT valid_o_key CHECK (o_key ~ '^[a-z0-9_-]+$')
+    CONSTRAINT valid_o_key CHECK (o_key ~ '^[a-zA-Z0-9_-]+$')
 );
 
 -- Index for efficient parent-child queries

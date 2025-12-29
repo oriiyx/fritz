@@ -25,14 +25,14 @@ RETURNING id, entity_class, parent_id, o_key, o_path, o_type, published, created
 `
 
 type CreateEntityParams struct {
-	EntityClass string
-	ParentID    pgtype.UUID
-	OKey        string
-	OPath       string
-	OType       string
-	Published   bool
-	CreatedBy   pgtype.UUID
-	UpdatedBy   pgtype.UUID
+	EntityClass string      `json:"entity_class"`
+	ParentID    pgtype.UUID `json:"parent_id"`
+	OKey        string      `json:"o_key"`
+	OPath       string      `json:"o_path"`
+	OType       string      `json:"o_type"`
+	Published   bool        `json:"published"`
+	CreatedBy   pgtype.UUID `json:"created_by"`
+	UpdatedBy   pgtype.UUID `json:"updated_by"`
 }
 
 // noinspection SqlResolve
@@ -110,8 +110,8 @@ WHERE o_path = $1
 `
 
 type GetEntityByPathParams struct {
-	OPath string
-	OKey  string
+	OPath string `json:"o_path"`
+	OKey  string `json:"o_key"`
 }
 
 // noinspection SqlResolve
@@ -165,23 +165,23 @@ LIMIT $2 OFFSET $3
 `
 
 type GetEntityChildrenParams struct {
-	ParentID pgtype.UUID
-	Limit    int32
-	Offset   int32
+	ParentID pgtype.UUID `json:"parent_id"`
+	Limit    int32       `json:"limit"`
+	Offset   int32       `json:"offset"`
 }
 
 type GetEntityChildrenRow struct {
-	ID            pgtype.UUID
-	EntityClass   string
-	ParentID      pgtype.UUID
-	OKey          string
-	OPath         string
-	OType         string
-	Published     bool
-	CreatedAt     pgtype.Timestamptz
-	UpdatedAt     pgtype.Timestamptz
-	HasChildren   bool
-	ChildrenCount int64
+	ID            pgtype.UUID        `json:"id"`
+	EntityClass   string             `json:"entity_class"`
+	ParentID      pgtype.UUID        `json:"parent_id"`
+	OKey          string             `json:"o_key"`
+	OPath         string             `json:"o_path"`
+	OType         string             `json:"o_type"`
+	Published     bool               `json:"published"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+	HasChildren   bool               `json:"has_children"`
+	ChildrenCount int64              `json:"children_count"`
 }
 
 // Get direct children of a parent entity with pagination
@@ -266,12 +266,12 @@ ORDER BY depth DESC
 `
 
 type GetEntityPathRow struct {
-	ID       pgtype.UUID
-	ParentID pgtype.UUID
-	OKey     string
-	OPath    string
-	OType    string
-	Depth    int32
+	ID       pgtype.UUID `json:"id"`
+	ParentID pgtype.UUID `json:"parent_id"`
+	OKey     string      `json:"o_key"`
+	OPath    string      `json:"o_path"`
+	OType    string      `json:"o_type"`
+	Depth    int32       `json:"depth"`
 }
 
 //	AND ($2::text IS NULL OR e.entity_class = $2) - todo
@@ -320,12 +320,12 @@ RETURNING id, entity_class, parent_id, o_key, o_path, o_type, published, created
 `
 
 type UpdateEntityParams struct {
-	ParentID  pgtype.UUID
-	OKey      string
-	OPath     string
-	Published bool
-	UpdatedBy pgtype.UUID
-	ID        pgtype.UUID
+	ParentID  pgtype.UUID `json:"parent_id"`
+	OKey      string      `json:"o_key"`
+	OPath     string      `json:"o_path"`
+	Published bool        `json:"published"`
+	UpdatedBy pgtype.UUID `json:"updated_by"`
+	ID        pgtype.UUID `json:"id"`
 }
 
 // noinspection SqlResolve

@@ -5,7 +5,7 @@ import {Alert} from '@/components/Alert'
 import {Loading} from '@/components/Loading'
 import {Button} from '@/components/Button'
 import {Input} from '@/components/Input'
-import {entitiesApi} from '@/services/entitiesService'
+import {definitionApi} from '@/services/definitionService.ts'
 import {DataComponent, DataComponentDefinition, DataComponentType, EntityDefinition,} from '@/generated/definitions'
 import {EntityList} from '@/components/definitions/EntityList.tsx'
 import {ComponentLayoutTree} from '@/components/definitions/ComponentLayoutTree'
@@ -32,7 +32,7 @@ export function DefinitionsPage() {
     // Fetch entity definitions using React Query
     const {data: entityDefinitions = [], isLoading, error} = useQuery({
         queryKey: ['entity-definitions'],
-        queryFn: entitiesApi.getEntityDefinitions,
+        queryFn: definitionApi.getEntityDefinitions,
     })
 
     // Fetch data component types using React Query
@@ -42,13 +42,13 @@ export function DefinitionsPage() {
         error: dataComponentError,
     } = useQuery({
         queryKey: ['data-component-types'],
-        queryFn: entitiesApi.getDataComponentTypes,
+        queryFn: definitionApi.getDataComponentTypes,
     })
 
     // Create mutation
     const createMutation = useMutation({
         mutationFn: async (definition: EntityDefinition) => {
-            await entitiesApi.createEntityDefinition(definition)
+            await definitionApi.createEntityDefinition(definition)
         },
         onSuccess: () => {
             setHasUnsavedChanges(false)
@@ -60,7 +60,7 @@ export function DefinitionsPage() {
     // Update mutation
     const updateMutation = useMutation({
         mutationFn: async (definition: EntityDefinition) => {
-            await entitiesApi.updateEntityDefinition(definition.id, definition)
+            await definitionApi.updateEntityDefinition(definition.id, definition)
         },
         onSuccess: () => {
             setHasUnsavedChanges(false)
@@ -71,7 +71,7 @@ export function DefinitionsPage() {
     // Delete mutation
     const deleteMutation = useMutation({
         mutationFn: async (id: string) => {
-            await entitiesApi.deleteEntityDefinition(id)
+            await definitionApi.deleteEntityDefinition(id)
         },
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['entity-definitions']})

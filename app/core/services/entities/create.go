@@ -15,12 +15,12 @@ import (
 )
 
 type CreateEntityRequest struct {
-	ParentID  *string                `json:"parent_id,omitempty"`
-	Key       string                 `json:"key" validate:"required,max=255"`
-	Path      string                 `json:"path" validate:"required"`
-	Type      string                 `json:"type,omitempty"`
-	Published bool                   `json:"published"`
-	Data      map[string]interface{} `json:"data" validate:"required"`
+	ParentID  *string `json:"parent_id,omitempty"`
+	Key       string  `json:"key" validate:"required,max=255"`
+	Path      string  `json:"path" validate:"required"`
+	Type      string  `json:"type,omitempty"`
+	Published bool    `json:"published"`
+	// Data      map[string]interface{} `json:"data" validate:"required"`
 }
 
 // CreateEntity creates a new entity instance
@@ -48,7 +48,7 @@ func (h *Handler) CreateEntity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the adapter for this entity class
-	adapter, err := adapters.Get(classID)
+	_, err := adapters.Get(classID)
 	if err != nil {
 		h.Logger.Error().Err(err).Str("class_id", classID).Msg("Unknown entity class")
 		errhandler.BadRequest(w, []byte(`{"error": "unknown entity class"}`))
@@ -93,18 +93,18 @@ func (h *Handler) CreateEntity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create the entity data using the adapter
-	result, err := adapter.Create(r.Context(), entity.ID, req.Data)
-	if err != nil {
-		h.Logger.Error().Err(err).Msg("Failed to create entity data")
-		// Rollback: delete the entity record
-		// TODO: Consider using transactions
-		errhandler.ServerError(w, errhandler.RespDBDataInsertFailure)
-		return
-	}
+	// result, err := adapter.Create(r.Context(), entity.ID, req.Data)
+	// if err != nil {
+	// 	h.Logger.Error().Err(err).Msg("Failed to create entity data")
+	// 	// Rollback: delete the entity record
+	// 	// TODO: Consider using transactions
+	// 	errhandler.ServerError(w, errhandler.RespDBDataInsertFailure)
+	// 	return
+	// }
 
 	response := map[string]interface{}{
 		"entity": entity,
-		"data":   result,
+		// "data":   result,
 	}
 
 	w.WriteHeader(http.StatusCreated)

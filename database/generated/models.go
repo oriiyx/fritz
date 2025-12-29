@@ -9,45 +9,45 @@ import (
 )
 
 type Entity struct {
-	ID          pgtype.UUID
-	EntityClass string
-	ParentID    pgtype.UUID
-	OKey        string
-	OPath       string
-	OType       string
-	Published   bool
-	CreatedAt   pgtype.Timestamptz
-	UpdatedAt   pgtype.Timestamptz
-	CreatedBy   pgtype.UUID
-	UpdatedBy   pgtype.UUID
+	ID          pgtype.UUID        `json:"id"`
+	EntityClass string             `json:"entity_class"`
+	ParentID    pgtype.UUID        `json:"parent_id"`
+	OKey        string             `json:"o_key"`
+	OPath       string             `json:"o_path"`
+	OType       string             `json:"o_type"`
+	Published   bool               `json:"published"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	CreatedBy   pgtype.UUID        `json:"created_by"`
+	UpdatedBy   pgtype.UUID        `json:"updated_by"`
 }
 
 type OauthIdentity struct {
-	ID         pgtype.UUID
-	UserID     pgtype.UUID
-	Provider   string
-	IDToken    []byte
-	Email      string
-	RawData    []byte
-	CreatedAt  pgtype.Timestamptz
-	LastUsedAt pgtype.Timestamptz
+	ID         pgtype.UUID        `json:"id"`
+	UserID     pgtype.UUID        `json:"user_id"`
+	Provider   string             `json:"provider"`
+	IDToken    []byte             `json:"id_token"`
+	Email      string             `json:"email"`
+	RawData    []byte             `json:"raw_data"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	LastUsedAt pgtype.Timestamptz `json:"last_used_at"`
 }
 
 type Session struct {
-	ID             pgtype.UUID
-	UserIdentityID pgtype.UUID
-	DeviceID       string
-	IsActive       bool
-	CreatedAt      pgtype.Timestamptz
-	ExpiresAt      pgtype.Timestamptz
-	LastActivityAt pgtype.Timestamptz
+	ID             pgtype.UUID        `json:"id"`
+	UserIdentityID pgtype.UUID        `json:"user_identity_id"`
+	DeviceID       string             `json:"device_id"`
+	IsActive       bool               `json:"is_active"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	ExpiresAt      pgtype.Timestamptz `json:"expires_at"`
+	LastActivityAt pgtype.Timestamptz `json:"last_activity_at"`
 }
 
 type User struct {
-	ID        pgtype.UUID
-	Email     string
-	Password  string
-	FullName  pgtype.Text
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
+	ID        pgtype.UUID        `json:"id"`
+	Email     string             `json:"email"`
+	Password  string             `json:"password"`
+	FullName  pgtype.Text        `json:"full_name"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }

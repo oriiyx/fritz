@@ -4,6 +4,7 @@ import {treeApi, TreeNode as TreeNodeType} from '@/services/treeService'
 import {TreeNode} from './TreeNode'
 import {Loading} from '@/components/Loading'
 import {FolderIcon} from '@heroicons/react/24/outline'
+import {AddEntityModal} from '@/components/tree/AddEntityModal'
 
 // Root entity ID from your migrations
 const ROOT_ENTITY_ID = '00000000-0000-0000-0000-000000000001'
@@ -18,6 +19,11 @@ export function TreeView() {
     const [selectedNode, setSelectedNode] = useState<TreeNodeType | null>(null)
     const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
     const [isRootSelected, setIsRootSelected] = useState(false)
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+    const [addEntityParent, setAddEntityParent] = useState<{
+        id: string | null
+        path: string
+    } | null>(null)
 
     // Fetch root's children to start
     const {data, isLoading, error} = useQuery({
@@ -35,7 +41,6 @@ export function TreeView() {
         setSelectedNode(node)
         setIsRootSelected(false)
         setContextMenu(null)
-        // TODO: Navigate to entity detail view or trigger action
         console.log('Selected node:', node)
     }
 
@@ -61,8 +66,22 @@ export function TreeView() {
     }
 
     const handleAddEntity = () => {
-        // TODO: Implement add entity logic
-        console.log('Add entity to:', contextMenu?.node)
+        if (!contextMenu) return
+
+        // Determine parent info based on context menu node
+        if (contextMenu.node === 'root') {
+            setAddEntityParent({
+                id: ROOT_ENTITY_ID,
+                path: '/',
+            })
+        } else {
+            setAddEntityParent({
+                id: contextMenu.node.id,
+                path: contextMenu.node.o_path,
+            })
+        }
+
+        setIsAddModalOpen(true)
         setContextMenu(null)
     }
 
@@ -72,6 +91,11 @@ export function TreeView() {
             console.log('Remove entity:', contextMenu?.node)
         }
         setContextMenu(null)
+    }
+
+    const handleAddModalClose = () => {
+        setIsAddModalOpen(false)
+        setAddEntityParent(null)
     }
 
     // Close context menu on outside click
@@ -113,7 +137,7 @@ export function TreeView() {
                     onContextMenu={(e) => handleContextMenu('root', e)}
                 >
                     {/* Empty spacer for alignment with children */}
-                    <span className="w-6" />
+                    <span className="w-6"/>
 
                     {/* Folder Icon */}
                     <FolderIcon className="h-4 w-4 text-warning"/>
@@ -163,8 +187,8 @@ export function TreeView() {
                     }}
                 >
                     <li>
-                        <button onClick={handleAddEntity} disabled>
-                            <span className="text-xs opacity-50">Add Entity (TODO)</span>
+                        <button onClick={handleAddEntity}>
+                            <span className="text-xs">Add Entity</span>
                         </button>
                     </li>
                     {/* Only show remove option for non-root nodes */}
@@ -176,6 +200,15 @@ export function TreeView() {
                         </li>
                     )}
                 </div>
+            )}
+
+            {/* Add Entity Modal */}
+            {isAddModalOpen && addEntityParent && (
+                <AddEntityModal
+                    parentId={addEntityParent.id}
+                    parentPath={addEntityParent.path}
+                    onClose={handleAddModalClose}
+                />
             )}
         </div>
     )

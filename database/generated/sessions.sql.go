@@ -36,9 +36,9 @@ RETURNING id, user_identity_id, device_id, is_active, created_at, expires_at, la
 `
 
 type CreateSessionParams struct {
-	UserIdentityID pgtype.UUID
-	DeviceID       string
-	ExpiresAt      pgtype.Timestamptz
+	UserIdentityID pgtype.UUID        `json:"user_identity_id"`
+	DeviceID       string             `json:"device_id"`
+	ExpiresAt      pgtype.Timestamptz `json:"expires_at"`
 }
 
 // noinspection SqlResolve
@@ -174,8 +174,8 @@ RETURNING id, user_identity_id, device_id, is_active, created_at, expires_at, la
 `
 
 type UpdateSessionActivityParams struct {
-	ID       pgtype.UUID
-	IsActive bool
+	ID       pgtype.UUID `json:"id"`
+	IsActive bool        `json:"is_active"`
 }
 
 // noinspection SqlResolve

@@ -18,11 +18,11 @@ RETURNING id, user_id, provider, id_token, email, raw_data, created_at, last_use
 `
 
 type CreateOAuthIdentityParams struct {
-	UserID   pgtype.UUID
-	Provider string
-	IDToken  []byte
-	Email    string
-	RawData  []byte
+	UserID   pgtype.UUID `json:"user_id"`
+	Provider string      `json:"provider"`
+	IDToken  []byte      `json:"id_token"`
+	Email    string      `json:"email"`
+	RawData  []byte      `json:"raw_data"`
 }
 
 // noinspection SqlResolve
@@ -55,8 +55,8 @@ RETURNING id, email, password, full_name, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	Email    string
-	Password string
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 // noinspection SqlResolve
@@ -82,8 +82,8 @@ WHERE provider = $1
 `
 
 type GetOAuthIdentityByProviderAndTokenParams struct {
-	Provider string
-	IDToken  []byte
+	Provider string `json:"provider"`
+	IDToken  []byte `json:"id_token"`
 }
 
 // noinspection SqlResolve
@@ -152,8 +152,8 @@ WHERE email = $2
 `
 
 type VerifyPasswordParams struct {
-	Password string
-	Email    string
+	Password string `json:"password"`
+	Email    string `json:"email"`
 }
 
 // noinspection SqlResolve
