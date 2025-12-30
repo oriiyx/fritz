@@ -80,6 +80,18 @@ func (q *Queries) DeleteEntity(ctx context.Context, id pgtype.UUID) error {
 	return err
 }
 
+const deleteEntityByClass = `-- name: DeleteEntityByClass :exec
+DELETE
+FROM entities
+WHERE entity_class = $1
+`
+
+// noinspection SqlResolve
+func (q *Queries) DeleteEntityByClass(ctx context.Context, entityClass string) error {
+	_, err := q.db.Exec(ctx, deleteEntityByClass, entityClass)
+	return err
+}
+
 const getEntityByID = `-- name: GetEntityByID :one
 SELECT id, entity_class, parent_id, o_key, o_path, o_type, published, has_data, created_at, updated_at, created_by, updated_by
 FROM entities

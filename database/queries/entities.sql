@@ -31,6 +31,12 @@ DELETE
 FROM entities
 WHERE id = $1;
 
+-- name: DeleteEntityByClass :exec
+-- noinspection SqlResolve
+DELETE
+FROM entities
+WHERE entity_class = $1;
+
 -- name: GetEntityByID :one
 -- noinspection SqlResolve
 SELECT *

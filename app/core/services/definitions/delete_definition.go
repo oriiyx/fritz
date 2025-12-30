@@ -38,6 +38,13 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = h.Queries.DeleteEntityByClass(r.Context(), definition.ID)
+	if err != nil {
+		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Str("definition_id", ID).Msg("Failed to delete entities from the entity table")
+		errhandler.ServerError(w, errhandler.RespDBDataRemoveFailure)
+		return
+	}
+
 	// 3. Find and delete database/fritz/queries_*.sql
 	queriesName := fmt.Sprintf("queries_%s.sql", definition.ID)
 	err = h.CustomWriter.DeleteFile(definition_builder.EntitiesTableQueriesFilePathTemplate, queriesName)
