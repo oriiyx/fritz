@@ -219,7 +219,7 @@ func getPgDate(data map[string]interface{}, key string) pgtype.Date {
 	var t time.Time
 	switch val := v.(type) {
 	case string:
-		parsed, err := time.Parse("2006-01-02", val)
+		parsed, err := time.Parse("2006-01-02T00:00:00.000Z", val)
 		if err != nil {
 			return pgtype.Date{Valid: false}
 		}

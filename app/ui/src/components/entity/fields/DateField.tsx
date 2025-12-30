@@ -27,7 +27,6 @@ export function DateField({component, value, onChange, error, disabled}: DateFie
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = e.target.value
-
         if (!inputValue) {
             onChange(null)
             return
