@@ -313,7 +313,7 @@ func (q *Queries) GetEntityPath(ctx context.Context, id pgtype.UUID) ([]GetEntit
 	return items, nil
 }
 
-const updateEntity = `-- name: UpdateEntity :one
+const updateEntity = `-- name: SaveEntity :one
 UPDATE entities
 SET parent_id  = $1,
     o_key      = $2,

@@ -1,10 +1,12 @@
 import {useState} from 'react'
-import {useQuery} from '@tanstack/react-query'
+import {useQuery, useQueryClient} from '@tanstack/react-query'
 import {treeApi, TreeNode as TreeNodeType} from '@/services/treeService'
 import {TreeNode} from './TreeNode'
 import {Loading} from '@/components/Loading'
 import {FolderIcon} from '@heroicons/react/24/outline'
 import {AddEntityModal} from '@/components/tree/AddEntityModal'
+import {entitiesApi} from "@/services/entitiesService.ts";
+import {useNavigate} from "@tanstack/react-router";
 
 // Root entity ID from your migrations
 const ROOT_ENTITY_ID = '00000000-0000-0000-0000-000000000001'
@@ -16,6 +18,9 @@ interface ContextMenuState {
 }
 
 export function TreeView() {
+    const queryClient = useQueryClient()
+    const navigate = useNavigate()
+
     const [selectedNode, setSelectedNode] = useState<TreeNodeType | null>(null)
     const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
     const [isRootSelected, setIsRootSelected] = useState(false)
@@ -42,12 +47,17 @@ export function TreeView() {
         setIsRootSelected(false)
         setContextMenu(null)
         console.log('Selected node:', node)
+        navigate({
+            to: '/entity/$id',
+            params: {id: node.id}
+        })
     }
 
     const handleRootSelect = () => {
         setSelectedNode(null)
         setIsRootSelected(true)
         setContextMenu(null)
+
         console.log('Selected root folder')
     }
 
@@ -86,11 +96,18 @@ export function TreeView() {
     }
 
     const handleRemoveEntity = () => {
-        // TODO: Implement remove entity logic
-        if (contextMenu?.node !== 'root') {
+        if (!contextMenu) return
+
+        if (contextMenu.node !== 'root') {
             console.log('Remove entity:', contextMenu?.node)
+            entitiesApi.deleteEntity(contextMenu.node.entity_class, contextMenu.node.id).then(() => {
+                // Invalidate tree queries to refresh the tree
+                queryClient.invalidateQueries({queryKey: ['tree-children']})
+            })
         }
+
         setContextMenu(null)
+        handleAddModalClose()
     }
 
     const handleAddModalClose = () => {
@@ -194,8 +211,8 @@ export function TreeView() {
                     {/* Only show remove option for non-root nodes */}
                     {!isRootNode && (
                         <li>
-                            <button onClick={handleRemoveEntity} disabled className="text-error">
-                                <span className="text-xs opacity-50">Remove (TODO)</span>
+                            <button onClick={handleRemoveEntity} className="text-error">
+                                <span className="text-xs">Remove</span>
                             </button>
                         </li>
                     )}

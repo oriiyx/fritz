@@ -34,14 +34,17 @@ func (c *Controller) RegisterRoutes() {
 			definitions.Method(http.MethodPost, "/create", requestlog.NewHandler(definitionsHandler.Create, c.Logger))
 			definitions.Method(http.MethodPut, "/{id}/update", requestlog.NewHandler(definitionsHandler.Update, c.Logger))
 			definitions.Method(http.MethodDelete, "/{id}/delete", requestlog.NewHandler(definitionsHandler.Delete, c.Logger))
+			definitions.Method(http.MethodGet, "/{id}", requestlog.NewHandler(definitionsHandler.GetSingleExisting, c.Logger))
 		})
 
 		entitiesHandler := entities.New(handlerFactory.Create("entities"))
 		treeHandler := tree.New(handlerFactory.Create("tree"))
 		r.Route("/entities", func(entities chi.Router) {
+			entities.Method(http.MethodPost, "/", requestlog.NewHandler(entitiesHandler.GetEntityData, c.Logger))
 			entities.Method(http.MethodPost, "/{definition_id}/read", requestlog.NewHandler(entitiesHandler.ReadEntity, c.Logger))
 			entities.Method(http.MethodPost, "/{definition_id}/create", requestlog.NewHandler(entitiesHandler.CreateEntity, c.Logger))
-			entities.Method(http.MethodPost, "/{definition_id}/update", requestlog.NewHandler(entitiesHandler.UpdateEntity, c.Logger))
+			entities.Method(http.MethodPost, "/{definition_id}/{entity_id}/transition", requestlog.NewHandler(entitiesHandler.TransitionEntity, c.Logger))
+			entities.Method(http.MethodPost, "/{definition_id}/save", requestlog.NewHandler(entitiesHandler.SaveEntity, c.Logger))
 			entities.Method(http.MethodPost, "/{definition_id}/delete", requestlog.NewHandler(entitiesHandler.DeleteEntity, c.Logger))
 
 			entities.Route("/tree", func(tree chi.Router) {

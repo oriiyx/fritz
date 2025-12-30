@@ -14,7 +14,7 @@ import (
 	db "github.com/oriiyx/fritz/database/generated"
 )
 
-type UpdateEntityRequest struct {
+type SaveEntityRequest struct {
 	ID        string                 `json:"id" validate:"required"`
 	ParentID  *string                `json:"parent_id,omitempty"`
 	Key       string                 `json:"key" validate:"required,max=255"`
@@ -24,12 +24,12 @@ type UpdateEntityRequest struct {
 	Data      map[string]interface{} `json:"data" validate:"required"`
 }
 
-// UpdateEntity is an endpoint that handles updating entity
-func (h *Handler) UpdateEntity(w http.ResponseWriter, r *http.Request) {
+// SaveEntity is an endpoint that handles saving entity
+func (h *Handler) SaveEntity(w http.ResponseWriter, r *http.Request) {
 	reqID := ctxUtil.RequestID(r.Context())
 	classID := chi.URLParam(r, DefinitionIDKey)
 
-	var req UpdateEntityRequest
+	var req SaveEntityRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Msg("Failed to decode request")
 		errhandler.BadRequest(w, errhandler.RespInvalidRequestBody)
@@ -82,6 +82,7 @@ func (h *Handler) UpdateEntity(w http.ResponseWriter, r *http.Request) {
 		OKey:      req.Key,
 		OPath:     req.Path,
 		Published: req.Published,
+		HasData:   true,
 		UpdatedBy: userID,
 	}
 

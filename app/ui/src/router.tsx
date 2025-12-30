@@ -5,6 +5,7 @@ import {LoginPage} from './pages/LoginPage'
 import {DashboardPage} from './pages/DashboardPage'
 import {NotFoundPage} from './pages/NotFoundPage'
 import {DefinitionsPage} from "@/pages/DefinitionsPage.tsx"
+import {EntityPage} from "@/pages/EntityPage.tsx"
 import {authApi} from './services/authService'
 
 // Root route - no authentication check here
@@ -66,10 +67,16 @@ const dashboardRoute = createRoute({
     },
 })
 
-const entitiesRoute = createRoute({
+const definitionsRoute = createRoute({
     getParentRoute: () => dashboardRoute,
     path: '/definitions',
     component: DefinitionsPage,
+})
+
+const entityRoute = createRoute({
+    getParentRoute: () => dashboardRoute,
+    path: '/entity/$id',
+    component: EntityPage,
 })
 
 const dashboardIndexRoute = createRoute({
@@ -88,7 +95,7 @@ const notFoundRoute = createRoute({
 // Create route tree
 const routeTree = rootRoute.addChildren([
     loginRoute,
-    dashboardRoute.addChildren([dashboardIndexRoute, entitiesRoute]),
+    dashboardRoute.addChildren([dashboardIndexRoute, definitionsRoute, entityRoute]),
     notFoundRoute,
 ])
 

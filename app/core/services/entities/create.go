@@ -23,8 +23,8 @@ type CreateEntityRequest struct {
 	Published bool    `json:"published"`
 }
 
-// SaveEntityRequest - for saving actual entity data
-type SaveEntityRequest struct {
+// TransitionEntityRequest - for saving actual entity data
+type TransitionEntityRequest struct {
 	Data map[string]interface{} `json:"data" validate:"required"`
 }
 
@@ -112,13 +112,13 @@ func (h *Handler) CreateEntity(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(response)
 }
 
-// SaveEntity saves data for an existing entity (can be called multiple times)
-func (h *Handler) SaveEntity(w http.ResponseWriter, r *http.Request) {
+// TransitionEntity saves data for an existing entity (can be called multiple times)
+func (h *Handler) TransitionEntity(w http.ResponseWriter, r *http.Request) {
 	reqID := ctxUtil.RequestID(r.Context())
 	classID := chi.URLParam(r, DefinitionIDKey)
-	entityID := chi.URLParam(r, "entity_id")
+	entityID := chi.URLParam(r, EntityIDKey)
 
-	var req SaveEntityRequest
+	var req TransitionEntityRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.Logger.Error().Err(err).Str(l.KeyReqID, reqID).Msg("Failed to decode request")
 		errhandler.BadRequest(w, errhandler.RespInvalidRequestBody)

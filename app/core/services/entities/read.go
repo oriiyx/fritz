@@ -58,7 +58,7 @@ func (h *Handler) ReadEntity(w http.ResponseWriter, r *http.Request) {
 	entity, err := h.Queries.GetEntityByID(r.Context(), entityID)
 	if err != nil {
 		h.Logger.Error().Err(err).Msg("Failed to read entity record")
-		errhandler.ServerError(w, errhandler.RespDBDataInsertFailure)
+		errhandler.ServerError(w, errhandler.RespDBDataAccessFailure)
 		return
 	}
 
@@ -68,7 +68,7 @@ func (h *Handler) ReadEntity(w http.ResponseWriter, r *http.Request) {
 		h.Logger.Error().Err(err).Msg("Failed to read entity data")
 		// Rollback: delete the entity record
 		// TODO: Consider using transactions
-		errhandler.ServerError(w, errhandler.RespDBDataInsertFailure)
+		errhandler.ServerError(w, errhandler.RespDBDataAccessFailure)
 		return
 	}
 
