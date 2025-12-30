@@ -4,10 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 // DataComponent represents an actual configured data component instance
 type DataComponent struct {
+	ID     string            `json:"id"`
 	Type   DataComponentType `json:"type" validate:"required"`
 	Name   string            `json:"name" validate:"required,max=255"`
 	Title  string            `json:"title" validate:"required,max=255"`
@@ -106,6 +109,27 @@ func (dc *DataComponent) ToColumnDefinition() string {
 	}
 
 	return strings.Join(parts, " ")
+}
+
+func (dc *DataComponent) UnmarshalJSON(data []byte) error {
+	// Create a type alias to avoid recursion
+	type Alias DataComponent
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(dc),
+	}
+
+	if err := json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+
+	// Generate ID if it doesn't exist
+	if dc.ID == "" {
+		dc.ID = uuid.New().String()
+	}
+
+	return nil
 }
 
 // GetGoType returns the Go type that SQLC generates based on DB type and nullability

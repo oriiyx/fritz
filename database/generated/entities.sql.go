@@ -19,9 +19,10 @@ INSERT INTO entities (entity_class,
                       o_type,
                       published,
                       created_by,
-                      updated_by)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-RETURNING id, entity_class, parent_id, o_key, o_path, o_type, published, created_at, updated_at, created_by, updated_by
+                      updated_by,
+                      has_data)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+RETURNING id, entity_class, parent_id, o_key, o_path, o_type, published, has_data, created_at, updated_at, created_by, updated_by
 `
 
 type CreateEntityParams struct {
@@ -33,6 +34,7 @@ type CreateEntityParams struct {
 	Published   bool        `json:"published"`
 	CreatedBy   pgtype.UUID `json:"created_by"`
 	UpdatedBy   pgtype.UUID `json:"updated_by"`
+	HasData     bool        `json:"has_data"`
 }
 
 // noinspection SqlResolve
@@ -46,6 +48,7 @@ func (q *Queries) CreateEntity(ctx context.Context, arg CreateEntityParams) (Ent
 		arg.Published,
 		arg.CreatedBy,
 		arg.UpdatedBy,
+		arg.HasData,
 	)
 	var i Entity
 	err := row.Scan(
@@ -56,6 +59,7 @@ func (q *Queries) CreateEntity(ctx context.Context, arg CreateEntityParams) (Ent
 		&i.OPath,
 		&i.OType,
 		&i.Published,
+		&i.HasData,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.CreatedBy,
@@ -77,7 +81,7 @@ func (q *Queries) DeleteEntity(ctx context.Context, id pgtype.UUID) error {
 }
 
 const getEntityByID = `-- name: GetEntityByID :one
-SELECT id, entity_class, parent_id, o_key, o_path, o_type, published, created_at, updated_at, created_by, updated_by
+SELECT id, entity_class, parent_id, o_key, o_path, o_type, published, has_data, created_at, updated_at, created_by, updated_by
 FROM entities
 WHERE id = $1
 `
@@ -94,6 +98,7 @@ func (q *Queries) GetEntityByID(ctx context.Context, id pgtype.UUID) (Entity, er
 		&i.OPath,
 		&i.OType,
 		&i.Published,
+		&i.HasData,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.CreatedBy,
@@ -103,7 +108,7 @@ func (q *Queries) GetEntityByID(ctx context.Context, id pgtype.UUID) (Entity, er
 }
 
 const getEntityByPath = `-- name: GetEntityByPath :one
-SELECT id, entity_class, parent_id, o_key, o_path, o_type, published, created_at, updated_at, created_by, updated_by
+SELECT id, entity_class, parent_id, o_key, o_path, o_type, published, has_data, created_at, updated_at, created_by, updated_by
 FROM entities
 WHERE o_path = $1
   AND o_key = $2
@@ -126,6 +131,7 @@ func (q *Queries) GetEntityByPath(ctx context.Context, arg GetEntityByPathParams
 		&i.OPath,
 		&i.OType,
 		&i.Published,
+		&i.HasData,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.CreatedBy,
@@ -314,9 +320,10 @@ SET parent_id  = $1,
     o_path     = $3,
     published  = $4,
     updated_by = $5,
+    has_data   = $6,
     updated_at = NOW()
-WHERE id = $6
-RETURNING id, entity_class, parent_id, o_key, o_path, o_type, published, created_at, updated_at, created_by, updated_by
+WHERE id = $7
+RETURNING id, entity_class, parent_id, o_key, o_path, o_type, published, has_data, created_at, updated_at, created_by, updated_by
 `
 
 type UpdateEntityParams struct {
@@ -325,6 +332,7 @@ type UpdateEntityParams struct {
 	OPath     string      `json:"o_path"`
 	Published bool        `json:"published"`
 	UpdatedBy pgtype.UUID `json:"updated_by"`
+	HasData   bool        `json:"has_data"`
 	ID        pgtype.UUID `json:"id"`
 }
 
@@ -336,6 +344,7 @@ func (q *Queries) UpdateEntity(ctx context.Context, arg UpdateEntityParams) (Ent
 		arg.OPath,
 		arg.Published,
 		arg.UpdatedBy,
+		arg.HasData,
 		arg.ID,
 	)
 	var i Entity
@@ -347,6 +356,7 @@ func (q *Queries) UpdateEntity(ctx context.Context, arg UpdateEntityParams) (Ent
 		&i.OPath,
 		&i.OType,
 		&i.Published,
+		&i.HasData,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.CreatedBy,

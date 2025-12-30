@@ -1,3 +1,4 @@
+DROP INDEX IF EXISTS idx_entities_has_data;
 DROP INDEX IF EXISTS idx_entities_tree_nav;
 DROP INDEX IF EXISTS idx_entities_class_published;
 DROP INDEX IF EXISTS idx_entities_published;

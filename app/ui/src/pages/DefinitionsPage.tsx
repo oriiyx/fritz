@@ -182,8 +182,21 @@ export function DefinitionsPage() {
     const handleComponentUpdate = (updatedComponent: DataComponent) => {
         if (!selectedDefinition) return
 
+        // Validate name if it changed
+        const originalComponent = selectedDefinition.layout.components.find(
+            (c) => c.id === updatedComponent.id
+        )
+
+        if (originalComponent && originalComponent.name !== updatedComponent.name) {
+            const nameError = validateComponentName(updatedComponent.name, updatedComponent.id)
+            if (nameError) {
+                setValidationError(nameError)
+                return
+            }
+        }
+
         const updatedComponents = selectedDefinition.layout.components.map((c) =>
-            c.name === updatedComponent.name ? updatedComponent : c
+            c.id === updatedComponent.id ? updatedComponent : c
         )
 
         const updatedDefinition = {
@@ -197,6 +210,7 @@ export function DefinitionsPage() {
         setSelectedDefinition(updatedDefinition)
         setSelectedComponent(updatedComponent)
         setHasUnsavedChanges(true)
+        setValidationError(null) // Clear any previous validation errors
     }
 
     const handleComponentDelete = (component: DataComponent) => {
@@ -205,7 +219,7 @@ export function DefinitionsPage() {
         if (!confirm(`Delete component "${component.title}"?`)) return
 
         const updatedComponents = selectedDefinition.layout.components.filter(
-            (c) => c.name !== component.name
+            (c) => c.id !== component.id
         )
 
         const updatedDefinition = {
@@ -218,7 +232,7 @@ export function DefinitionsPage() {
 
         setSelectedDefinition(updatedDefinition)
 
-        if (selectedComponent?.name === component.name) {
+        if (selectedComponent?.id === component.id) {
             setSelectedComponent(null)
         }
 
@@ -239,6 +253,7 @@ export function DefinitionsPage() {
         }
 
         const newComponent: DataComponent = {
+            id: crypto.randomUUID(), // Generate UUID
             type: componentType.id as DataComponentType,
             name: newName,
             title: componentType.label,
@@ -307,6 +322,29 @@ export function DefinitionsPage() {
         deleteMutation.mutate(selectedDefinition.id)
     }
 
+    const validateComponentName = (name: string, currentComponentId: string): string | null => {
+        if (!name.trim()) {
+            return 'Field name is required'
+        }
+
+        // Check for valid database column name (alphanumeric + underscore, starts with letter)
+        if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(name)) {
+            return 'Field name must start with a letter and contain only letters, numbers, and underscores'
+        }
+
+        // Check for uniqueness
+        const isDuplicate = selectedDefinition?.layout.components.some(
+            (c) => c.id !== currentComponentId && c.name === name
+        )
+
+        if (isDuplicate) {
+            return `Field name "${name}" is already used by another component`
+        }
+
+        return null
+    }
+
+
     // Determine if save is in progress
     const isSaving = createMutation.isPending || updateMutation.isPending
 
@@ -339,7 +377,7 @@ export function DefinitionsPage() {
                                     onClick={handleCancelCreateNew}
                                     className="btn btn-ghost btn-sm btn-circle"
                                 >
-                                    <XMarkIcon className="h-5 w-5" />
+                                    <XMarkIcon className="h-5 w-5"/>
                                 </button>
                             </div>
 
@@ -401,7 +439,7 @@ export function DefinitionsPage() {
                 </div>
                 <Button
                     variant="primary"
-                    iconLeft={<PlusIcon className="h-5 w-5" />}
+                    iconLeft={<PlusIcon className="h-5 w-5"/>}
                     onClick={handleCreateNewDefinition}
                 >
                     Create New Definition

@@ -7,8 +7,9 @@ INSERT INTO entities (entity_class,
                       o_type,
                       published,
                       created_by,
-                      updated_by)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                      updated_by,
+                      has_data)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING *;
 
 -- name: UpdateEntity :one
@@ -19,8 +20,9 @@ SET parent_id  = $1,
     o_path     = $3,
     published  = $4,
     updated_by = $5,
+    has_data   = $6,
     updated_at = NOW()
-WHERE id = $6
+WHERE id = $7
 RETURNING *;
 
 -- name: DeleteEntity :exec

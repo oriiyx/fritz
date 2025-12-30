@@ -98,7 +98,7 @@ export function ComponentLayoutTree({
     return (
         <div className="space-y-2">
             {components.map((component, index) => (
-                <div key={component.name}>
+                <div key={component.id}>
                     {/* Drop indicator above */}
                     {dropIndicator?.index === index && dropIndicator.position === 'above' && (
                         <div className="my-1 h-0.5 bg-primary"/>
@@ -111,7 +111,7 @@ export function ComponentLayoutTree({
                         className={`
                             group flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 transition-all
                             ${
-                            selectedComponent?.name === component.name
+                            selectedComponent?.id === component.id
                                 ? 'border-primary bg-primary/10'
                                 : 'border-base-300 hover:border-base-400'
                         }

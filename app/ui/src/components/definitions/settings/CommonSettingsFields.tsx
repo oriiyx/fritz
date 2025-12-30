@@ -25,7 +25,7 @@ export function CommonSettingsFields({component, onFieldChange}: CommonSettingsF
                         value={component.name}
                         onChange={(e) => onFieldChange('name', e.target.value)}
                         fullWidth
-                        disabled
+                        // disabled
                         className="font-mono"
                     />
 

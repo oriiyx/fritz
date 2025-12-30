@@ -16,6 +16,7 @@ type Entity struct {
 	OPath       string             `json:"o_path"`
 	OType       string             `json:"o_type"`
 	Published   bool               `json:"published"`
+	HasData     bool               `json:"has_data"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 	CreatedBy   pgtype.UUID        `json:"created_by"`

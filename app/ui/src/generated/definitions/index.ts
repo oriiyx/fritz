@@ -54,6 +54,7 @@ export interface DataComponentDefinition {
  * DataComponent represents an actual configured data component instance
  */
 export interface DataComponent {
+  id: string;
   type: DataComponentType;
   name: string;
   title: string;
@@ -69,6 +70,10 @@ export interface DataComponent {
    */
   settings: any;
 }
+/**
+ * Create a type alias to avoid recursion
+ */
+export type Alias = DataComponent;
 
 //////////
 // source: db-types.go
