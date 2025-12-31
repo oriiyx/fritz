@@ -10,9 +10,12 @@ const (
 )
 
 const (
-	ComponentInput   DataComponentType = "input"
-	ComponentInteger DataComponentType = "integer"
-	ComponentDate    DataComponentType = "date"
+	ComponentInput    DataComponentType = "input"
+	ComponentTextarea DataComponentType = "textarea"
+	ComponentInteger  DataComponentType = "integer"
+	ComponentFloat4   DataComponentType = "float4"
+	ComponentFloat8   DataComponentType = "float8"
+	ComponentDate     DataComponentType = "date"
 )
 
 // DataComponentDefinition Common metadata for all data components
@@ -34,6 +37,14 @@ var DataComponentRegistry = map[DataComponentType]DataComponentDefinition{
 		Icon:          "text-cursor",
 		DefaultDBType: DataTypeVarchar,
 	},
+	ComponentTextarea: {
+		ID:            ComponentTextarea,
+		Label:         "Textarea",
+		Category:      CategoryText,
+		Tooltip:       "Multi line text input field",
+		Icon:          "text-cursor",
+		DefaultDBType: DataTypeText,
+	},
 	ComponentInteger: {
 		ID:            ComponentInteger,
 		Label:         "Integer",
@@ -41,6 +52,22 @@ var DataComponentRegistry = map[DataComponentType]DataComponentDefinition{
 		Tooltip:       "Whole number field",
 		Icon:          "hash",
 		DefaultDBType: DataTypeInteger,
+	},
+	ComponentFloat4: {
+		ID:            ComponentFloat4,
+		Label:         "Float 4-byte",
+		Category:      CategoryNumeric,
+		Tooltip:       "Float 4-byte number field",
+		Icon:          "hash",
+		DefaultDBType: DataTypeFloat4,
+	},
+	ComponentFloat8: {
+		ID:            ComponentFloat8,
+		Label:         "Float 8-byte",
+		Category:      CategoryNumeric,
+		Tooltip:       "Float 8-byte number field",
+		Icon:          "hash",
+		DefaultDBType: DataTypeFloat8,
 	},
 	ComponentDate: {
 		ID:            ComponentDate,

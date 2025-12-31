@@ -1,3 +1,5 @@
 export {InputField} from './InputField'
 export {IntegerField} from './IntegerField'
+export {FloatField} from './FloatField'
 export {DateField} from './DateField'
+export {TextareaField} from './TextareaField'

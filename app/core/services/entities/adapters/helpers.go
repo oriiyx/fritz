@@ -182,6 +182,105 @@ func getPgInt2(data map[string]interface{}, key string) pgtype.Int2 {
 	return pgtype.Int2{Int16: intVal, Valid: true}
 }
 
+// Float helpers - mandatory (NOT NULL)
+func mustGetFloat32(data map[string]interface{}, key string) float32 {
+	v, ok := data[key]
+	if !ok {
+		panic(fmt.Sprintf("missing required field: %s", key))
+	}
+
+	switch val := v.(type) {
+	case float64:
+		return float32(val)
+	case int:
+		return float32(val)
+	case int32:
+		return float32(val)
+	case int64:
+		return float32(val)
+	case float32:
+		return val
+	default:
+		panic(fmt.Sprintf("field %s must be numeric, got %T", key, v))
+	}
+}
+
+func mustGetFloat64(data map[string]interface{}, key string) float64 {
+	v, ok := data[key]
+	if !ok {
+		panic(fmt.Sprintf("missing required field: %s", key))
+	}
+
+	switch val := v.(type) {
+	case float64:
+		return val
+	case int:
+		return float64(val)
+	case int32:
+		return float64(val)
+	case int64:
+		return float64(val)
+	case float32:
+		return float64(val)
+	default:
+		panic(fmt.Sprintf("field %s must be numeric, got %T", key, v))
+	}
+}
+
+func getPgFloat4(data map[string]interface{}, key string) pgtype.Float4 {
+	v, ok := data[key]
+	if !ok || v == nil {
+		return pgtype.Float4{Valid: false}
+	}
+
+	var floatVal float32
+	switch val := v.(type) {
+	case float64:
+		floatVal = float32(val)
+	case int:
+		floatVal = float32(val)
+	case int16:
+		floatVal = float32(val)
+	case int32:
+		floatVal = float32(val)
+	case int64:
+		floatVal = float32(val)
+	case float32:
+		floatVal = val
+	default:
+		return pgtype.Float4{Valid: false}
+	}
+
+	return pgtype.Float4{Float32: floatVal, Valid: true}
+}
+
+func getPgFloat8(data map[string]interface{}, key string) pgtype.Float8 {
+	v, ok := data[key]
+	if !ok || v == nil {
+		return pgtype.Float8{Valid: false}
+	}
+
+	var floatVal float64
+	switch val := v.(type) {
+	case float64:
+		floatVal = val
+	case int:
+		floatVal = float64(val)
+	case int16:
+		floatVal = float64(val)
+	case int32:
+		floatVal = float64(val)
+	case int64:
+		floatVal = float64(val)
+	case float32:
+		floatVal = float64(val)
+	default:
+		return pgtype.Float8{Valid: false}
+	}
+
+	return pgtype.Float8{Float64: floatVal, Valid: true}
+}
+
 // Boolean helpers
 func mustGetBool(data map[string]interface{}, key string) bool {
 	v, ok := data[key]

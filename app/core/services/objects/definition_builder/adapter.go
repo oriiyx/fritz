@@ -229,6 +229,20 @@ func (e *Builder) genFieldConversion(comp definitions.DataComponent, dataVar str
 	case "pgtype.Int2":
 		return fmt.Sprintf("getPgInt2(%s, \"%s\")", dataVar, fieldName)
 
+	//	Float - NOT NULL
+	case "float32":
+		return fmt.Sprintf("mustGetFloat32(%s, \"%s\")", dataVar, fieldName)
+
+	case "float64":
+		return fmt.Sprintf("mustGetFloat64(%s, \"%s\")", dataVar, fieldName)
+
+	// Float - nullable
+	case "pgtype.Float4":
+		return fmt.Sprintf("getPgFloat4(%s, \"%s\")", dataVar, fieldName)
+
+	case "pgtype.Float8":
+		return fmt.Sprintf("getPgFloat8(%s, \"%s\")", dataVar, fieldName)
+
 	// Boolean types
 	case "bool":
 		return fmt.Sprintf("mustGetBool(%s, \"%s\")", dataVar, fieldName)

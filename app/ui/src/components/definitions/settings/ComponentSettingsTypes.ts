@@ -1,8 +1,8 @@
 import {
     DataComponent,
-    DateSettings as DateSettingsType,
+    DateSettings as DateSettingsType, FloatSettings,
     InputSettings as InputSettingsType,
-    IntegerSettings as IntegerSettingsType
+    IntegerSettings as IntegerSettingsType, TextareaSettings
 } from '@/generated/definitions'
 
 /**
@@ -13,6 +13,18 @@ export type ComponentWithSettings =
     | (Omit<DataComponent, 'type' | 'settings'> & {
     type: 'input'
     settings: InputSettingsType
+})
+    | (Omit<DataComponent, 'type' | 'settings'> & {
+    type: 'textarea'
+    settings: TextareaSettings
+})
+     | (Omit<DataComponent, 'type' | 'settings'> & {
+    type: 'float4'
+    settings: FloatSettings
+})
+    | (Omit<DataComponent, 'type' | 'settings'> & {
+    type: 'float8'
+    settings: FloatSettings
 })
     | (Omit<DataComponent, 'type' | 'settings'> & {
     type: 'integer'
@@ -40,6 +52,13 @@ export function isInputComponent(component: DataComponent): component is Compone
 
 export function isIntegerComponent(component: DataComponent): component is ComponentWithSettings & { type: 'integer' } {
     return component.type === 'integer'
+}
+
+export function isFloat4Component(component: DataComponent): component is ComponentWithSettings & { type: 'float4' } {
+    return component.type === 'float4'
+}
+export function isFloat8Component(component: DataComponent): component is ComponentWithSettings & { type: 'float8' } {
+    return component.type === 'float8'
 }
 
 export function isDateComponent(component: DataComponent): component is ComponentWithSettings & { type: 'date' } {

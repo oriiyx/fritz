@@ -44,8 +44,29 @@ func (dc *DataComponent) GetSettings() (interface{}, error) {
 		}
 		return settings, nil
 
+	case ComponentTextarea:
+		var settings TextareaSettings
+		if err := json.Unmarshal(dc.Settings, &settings); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal input settings: %w", err)
+		}
+		return settings, nil
+
 	case ComponentInteger:
 		var settings IntegerSettings
+		if err := json.Unmarshal(dc.Settings, &settings); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal integer settings: %w", err)
+		}
+		return settings, nil
+
+	case ComponentFloat4:
+		var settings FloatSettings
+		if err := json.Unmarshal(dc.Settings, &settings); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal integer settings: %w", err)
+		}
+		return settings, nil
+
+	case ComponentFloat8:
+		var settings FloatSettings
 		if err := json.Unmarshal(dc.Settings, &settings); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal integer settings: %w", err)
 		}
@@ -94,8 +115,20 @@ func (dc *DataComponent) ToColumnDefinition() string {
 		if s, ok := settings.(InputSettings); ok && s.DefaultValue != "" {
 			parts = append(parts, fmt.Sprintf("DEFAULT '%s'", s.DefaultValue))
 		}
+	case ComponentTextarea:
+		if s, ok := settings.(TextareaSettings); ok && s.DefaultValue != "" {
+			parts = append(parts, fmt.Sprintf("DEFAULT '%s'", s.DefaultValue))
+		}
 	case ComponentInteger:
 		if s, ok := settings.(IntegerSettings); ok && s.DefaultValue != nil {
+			parts = append(parts, fmt.Sprintf("DEFAULT %d", *s.DefaultValue))
+		}
+	case ComponentFloat4:
+		if s, ok := settings.(FloatSettings); ok && s.DefaultValue != nil {
+			parts = append(parts, fmt.Sprintf("DEFAULT %d", *s.DefaultValue))
+		}
+	case ComponentFloat8:
+		if s, ok := settings.(FloatSettings); ok && s.DefaultValue != nil {
 			parts = append(parts, fmt.Sprintf("DEFAULT %d", *s.DefaultValue))
 		}
 	case ComponentDate:
@@ -147,6 +180,18 @@ func (dc *DataComponent) GetGoType() string {
 			return "int32"
 		}
 		return "pgtype.Int4"
+
+	case DataTypeFloat4:
+		if dc.Mandatory {
+			return "float4"
+		}
+		return "pgtype.Float4"
+
+	case DataTypeFloat8:
+		if dc.Mandatory {
+			return "float8"
+		}
+		return "pgtype.Float8"
 
 	case DataTypeBigInt:
 		if dc.Mandatory {

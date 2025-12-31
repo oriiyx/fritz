@@ -58,8 +58,23 @@ func (e *Builder) UpdateTableFromChangeset(changeset *ComponentChangeset, tablen
 				hasDefault = true
 				defaultValue = fmt.Sprintf("'%s'", s.DefaultValue)
 			}
+		case definitions.ComponentTextarea:
+			if s, ok := settings.(definitions.TextareaSettings); ok && s.DefaultValue != "" {
+				hasDefault = true
+				defaultValue = fmt.Sprintf("'%s'", s.DefaultValue)
+			}
 		case definitions.ComponentInteger:
 			if s, ok := settings.(definitions.IntegerSettings); ok && s.DefaultValue != nil {
+				hasDefault = true
+				defaultValue = fmt.Sprintf("%d", *s.DefaultValue)
+			}
+		case definitions.ComponentFloat4:
+			if s, ok := settings.(definitions.FloatSettings); ok && s.DefaultValue != nil {
+				hasDefault = true
+				defaultValue = fmt.Sprintf("%d", *s.DefaultValue)
+			}
+		case definitions.ComponentFloat8:
+			if s, ok := settings.(definitions.FloatSettings); ok && s.DefaultValue != nil {
 				hasDefault = true
 				defaultValue = fmt.Sprintf("%d", *s.DefaultValue)
 			}

@@ -1,10 +1,11 @@
 import {DataComponent} from '@/generated/definitions'
 import {Card, CardBody, CardTitle} from '@/components/Card'
-import {CommonSettingsFields} from '@/components/definitions/settings'
+import {CommonSettingsFields, isFloat4Component, isFloat8Component} from '@/components/definitions/settings'
 import {InputSettings} from './settings/InputSettings'
 import {IntegerSettings} from './settings/IntegerSettings'
 import {DateSettings} from './settings/DateSettings'
 import {isDateComponent, isInputComponent, isIntegerComponent,} from '@/components/definitions/settings'
+import {FloatSettings} from "@/components/definitions/settings/FloatSettings.tsx";
 
 interface Props {
     component: DataComponent | null
@@ -52,6 +53,10 @@ export function ComponentSettingsPanel({component, onComponentUpdate}: Props) {
 
         if (isIntegerComponent(component)) {
             return <IntegerSettings component={component} onSettingsChange={handleSettingsChange}/>
+        }
+
+        if (isFloat4Component(component) || isFloat8Component(component)) {
+            return <FloatSettings component={component} onSettingsChange={handleSettingsChange}/>
         }
 
         if (isDateComponent(component)) {

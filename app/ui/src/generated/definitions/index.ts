@@ -14,11 +14,19 @@ export interface InputSettings {
   columnLength?: number /* int */;
   regexValidation?: string;
 }
+export interface TextareaSettings {
+  defaultValue?: string;
+}
 export interface IntegerSettings {
   defaultValue?: number /* int */;
   minValue?: number /* int */;
   maxValue?: number /* int */;
   unsigned: boolean;
+}
+export interface FloatSettings {
+  defaultValue?: number /* int */;
+  minValue?: number /* int */;
+  maxValue?: number /* int */;
 }
 export interface DateSettings {
   defaultValue?: string /* RFC3339 */;
@@ -33,7 +41,10 @@ export const CategoryText: DataComponentCategory = "text";
 export const CategoryNumeric: DataComponentCategory = "numeric";
 export const CategoryDate: DataComponentCategory = "date";
 export const ComponentInput: DataComponentType = "input";
+export const ComponentTextarea: DataComponentType = "textarea";
 export const ComponentInteger: DataComponentType = "integer";
+export const ComponentFloat4: DataComponentType = "float4";
+export const ComponentFloat8: DataComponentType = "float8";
 export const ComponentDate: DataComponentType = "date";
 /**
  * DataComponentDefinition Common metadata for all data components

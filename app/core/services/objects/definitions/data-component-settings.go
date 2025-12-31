@@ -29,6 +29,15 @@ func (s InputSettings) Validate() error {
 	return nil
 }
 
+type TextareaSettings struct {
+	DefaultValue string `json:"defaultValue,omitempty"`
+}
+
+func (t TextareaSettings) Validate() error {
+	// No specific validation needed for now
+	return nil
+}
+
 type IntegerSettings struct {
 	DefaultValue *int `json:"defaultValue,omitempty"`
 	MinValue     *int `json:"minValue,omitempty"`
@@ -45,6 +54,19 @@ func (s IntegerSettings) Validate() error {
 	}
 	if s.Unsigned && s.MinValue != nil && *s.MinValue < 0 {
 		return fmt.Errorf("minValue cannot be negative when unsigned is true")
+	}
+	return nil
+}
+
+type FloatSettings struct {
+	DefaultValue *int `json:"defaultValue,omitempty"`
+	MinValue     *int `json:"minValue,omitempty"`
+	MaxValue     *int `json:"maxValue,omitempty"`
+}
+
+func (s FloatSettings) Validate() error {
+	if s.MinValue != nil && s.MaxValue != nil && *s.MinValue > *s.MaxValue {
+		return fmt.Errorf("minValue cannot be greater than maxValue")
 	}
 	return nil
 }

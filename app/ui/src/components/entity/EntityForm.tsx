@@ -10,6 +10,7 @@ import {IntegerField} from './fields/IntegerField'
 import {DateField} from './fields/DateField'
 import {CheckCircleIcon} from '@heroicons/react/24/outline'
 import {Loading} from '@/components/Loading'
+import {FloatField, TextareaField} from "@/components/entity/fields";
 
 interface EntityFormProps {
     entity: Entity
@@ -51,7 +52,16 @@ export function EntityForm({entity, definition, onSaveSuccess}: EntityFormProps)
                     case 'input':
                         initialData[component.name] = settings.defaultValue || ''
                         break
+                    case 'textarea':
+                        initialData[component.name] = settings.defaultValue || ''
+                        break
                     case 'integer':
+                        initialData[component.name] = settings.defaultValue ?? null
+                        break
+                    case 'float4':
+                        initialData[component.name] = settings.defaultValue ?? null
+                        break
+                    case 'flot8':
                         initialData[component.name] = settings.defaultValue ?? null
                         break
                     case 'date':
@@ -72,6 +82,7 @@ export function EntityForm({entity, definition, onSaveSuccess}: EntityFormProps)
 
     const saveMutation = useMutation({
         mutationFn: async () => {
+            console.log(formData)
             if (isTransitionMode) {
                 return entitiesApi.transitionEntity(entity.entity_class, entity.id, {data: formData})
             } else {
@@ -145,7 +156,7 @@ export function EntityForm({entity, definition, onSaveSuccess}: EntityFormProps)
                         }
                         break
 
-                    case 'integer':
+                    case 'integer' : {
                         const numValue = Number(value)
                         if (settings.minValue !== undefined && numValue < settings.minValue) {
                             newErrors[component.name] = `${component.title} must be at least ${settings.minValue}`
@@ -157,6 +168,29 @@ export function EntityForm({entity, definition, onSaveSuccess}: EntityFormProps)
                             newErrors[component.name] = `${component.title} must be a positive number`
                         }
                         break
+                    }
+
+                    case 'float4' : {
+                        const numValue = Number(value)
+                        if (settings.minValue !== undefined && numValue < settings.minValue) {
+                            newErrors[component.name] = `${component.title} must be at least ${settings.minValue}`
+                        }
+                        if (settings.maxValue !== undefined && numValue > settings.maxValue) {
+                            newErrors[component.name] = `${component.title} must be at most ${settings.maxValue}`
+                        }
+                        break
+                    }
+
+                    case 'float8' : {
+                        const numValue = Number(value)
+                        if (settings.minValue !== undefined && numValue < settings.minValue) {
+                            newErrors[component.name] = `${component.title} must be at least ${settings.minValue}`
+                        }
+                        if (settings.maxValue !== undefined && numValue > settings.maxValue) {
+                            newErrors[component.name] = `${component.title} must be at most ${settings.maxValue}`
+                        }
+                        break
+                    }
                 }
             }
         })
@@ -189,8 +223,14 @@ export function EntityForm({entity, definition, onSaveSuccess}: EntityFormProps)
         switch (component.type) {
             case 'input':
                 return <InputField key={component.id} {...commonProps} />
+            case 'textarea':
+                return <TextareaField key={component.id} {...commonProps} />
             case 'integer':
                 return <IntegerField key={component.id} {...commonProps} />
+            case 'float4':
+                return <FloatField key={component.id} {...commonProps} />
+            case 'float8':
+                return <FloatField key={component.id} {...commonProps} />
             case 'date':
                 return <DateField key={component.id} {...commonProps} />
             default:

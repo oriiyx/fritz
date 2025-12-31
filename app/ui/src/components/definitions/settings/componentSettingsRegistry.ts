@@ -4,6 +4,7 @@ import {InputSettings} from './InputSettings'
 import {IntegerSettings} from './IntegerSettings'
 import {DateSettings} from './DateSettings'
 import * as React from 'react'
+import {FloatSettings} from "@/components/definitions/settings/FloatSettings.tsx";
 
 /**
  * Type helper for settings components.
@@ -38,6 +39,8 @@ export const componentSettingsRegistry = {
     input: InputSettings as SettingsComponentFor<'input'>,
     integer: IntegerSettings as SettingsComponentFor<'integer'>,
     date: DateSettings as SettingsComponentFor<'date'>,
+    float4: FloatSettings as SettingsComponentFor<'float4'>,
+    float8: FloatSettings as SettingsComponentFor<'float8'>,
 } as const
 
 /**
