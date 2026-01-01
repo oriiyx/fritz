@@ -13,8 +13,19 @@ import (
 func newVersionCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "version",
-		Short: "Print version information",
-		Long:  `Print detailed version information about Fritz CLI including build date, git commit, and platform.`,
+		Short: "Display Fritz CLI version information",
+		Long: `Display version information for Fritz CLI.
+
+Shows the version number, build date, git commit, Go version, and platform.
+Use --json flag for machine-readable output or --short for version number only.`,
+		Example: `  # Show full version details
+  fritz version
+
+  # Show only version number
+  fritz version --short
+
+  # Output as JSON
+  fritz version --json`,
 		Run: func(cmd *cobra.Command, args []string) {
 			if jsonOutput {
 				info := version.GetBuildInfo()
@@ -33,8 +44,8 @@ func newVersionCmd() *cobra.Command {
 	}
 
 	// Version command flags
-	cmd.Flags().BoolVarP(&jsonOutput, "json", "j", false, "Output version information in JSON format")
-	cmd.Flags().BoolVarP(&shortOutput, "short", "s", false, "Output only the version number")
+	cmd.Flags().BoolVarP(&jsonOutput, "json", "j", false, "output version information in JSON format")
+	cmd.Flags().BoolVarP(&shortOutput, "short", "s", false, "output only the version number")
 
 	return cmd
 }

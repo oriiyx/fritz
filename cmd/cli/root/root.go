@@ -51,9 +51,12 @@ func Execute() {
 
 func newRootCmd(deps *config.Dependencies) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "fritz",
-		Short:   "CLI tool",
-		Long:    `Fritz CLI tool.`,
+		Use:   "fritz",
+		Short: "Fritz - Dynamic Data Framework CLI",
+		Long: `Fritz CLI - Command-line interface for managing Fritz PIM system.
+
+Provides tools for user management, database operations, and system administration.
+Use 'fritz [command] --help' for more information about a command.`,
 		Version: version.GetVersion(),
 	}
 
