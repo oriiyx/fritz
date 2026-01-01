@@ -50,22 +50,22 @@ func (e *Builder) CreateCrudOperations(tablename string, d *definitions.EntityDe
 		Str("file", fmt.Sprintf("%s/%s.sql", EntitiesTableQueriesFilePathTemplate, queriesName)).
 		Msg("Generated CRUD operations file")
 
-	// Run sqlc generate
-	cmd := exec.Command("sqlc", "generate")
+	// Run sqlc users
+	cmd := exec.Command("sqlc", "users")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		e.logger.Error().
 			Err(err).
 			Str("output", string(output)).
-			Msg("SQLC generate failed")
-		return fmt.Errorf("sqlc generate failed: %w - output: %s", err, string(output))
+			Msg("SQLC users failed")
+		return fmt.Errorf("sqlc users failed: %w - output: %s", err, string(output))
 	}
 
 	e.logger.Info().
 		Str("entity_id", d.ID).
 		Msg("SQLC generation completed successfully")
 
-	// Now generate the adapter code that bridges JSON -> SQLC
+	// Now users the adapter code that bridges JSON -> SQLC
 	adapterCode := e.genAdapterCode(d)
 	adapterFilename := e.CreateAdapterFileName(d)
 

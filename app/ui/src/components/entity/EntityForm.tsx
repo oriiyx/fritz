@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react'
+import {useMemo, useState} from 'react'
 import {useMutation, useQuery} from '@tanstack/react-query'
 import {DataComponent, EntityDefinition} from '@/generated/definitions'
 import {entitiesApi, Entity, ModifyEntityResponse} from '@/services/entitiesService'
@@ -19,11 +19,6 @@ interface EntityFormProps {
 }
 
 export function EntityForm({entity, definition, onSaveSuccess}: EntityFormProps) {
-    const [formData, setFormData] = useState<Record<string, unknown>>({})
-    const [errors, setErrors] = useState<Record<string, string>>({})
-    const [hasChanges, setHasChanges] = useState(false)
-    const [isInitialized, setIsInitialized] = useState(false)
-
     const isTransitionMode = !entity.has_data
     const isEditMode = entity.has_data
 
@@ -39,50 +34,51 @@ export function EntityForm({entity, definition, onSaveSuccess}: EntityFormProps)
         staleTime: 0, // Always fetch fresh data
     })
 
-    // Initialize form data
-    useEffect(() => {
-        if (isTransitionMode && !isInitialized) {
-            // Transition mode: Initialize with defaults
-            const initialData: Record<string, unknown> = {}
-            definition.layout.components.forEach(component => {
-                if (component.invisible) return
-
-                const settings = component.settings || {}
-                switch (component.type) {
-                    case 'input':
-                        initialData[component.name] = settings.defaultValue || ''
-                        break
-                    case 'textarea':
-                        initialData[component.name] = settings.defaultValue || ''
-                        break
-                    case 'integer':
-                        initialData[component.name] = settings.defaultValue ?? null
-                        break
-                    case 'float4':
-                        initialData[component.name] = settings.defaultValue ?? null
-                        break
-                    case 'flot8':
-                        initialData[component.name] = settings.defaultValue ?? null
-                        break
-                    case 'date':
-                        initialData[component.name] = settings.defaultValue || null
-                        break
-                    default:
-                        initialData[component.name] = null
-                }
-            })
-            setFormData(initialData)
-            setIsInitialized(true)
-        } else if (isEditMode && entityData && !isInitialized) {
-            // Edit mode: Initialize with existing data
-            setFormData(entityData.data)
-            setIsInitialized(true)
+    // Compute initial form data - memoized to avoid recalculation on every render
+    const initialFormData = useMemo(() => {
+        // If in edit mode and data is available, use it
+        if (isEditMode && entityData) {
+            return entityData.data
         }
-    }, [isTransitionMode, isEditMode, entityData, definition.layout.components, isInitialized])
+
+        // Transition mode: Initialize with defaults
+        const initialData: Record<string, unknown> = {}
+        definition.layout.components.forEach(component => {
+            if (component.invisible) return
+
+            const settings = component.settings || {}
+            switch (component.type) {
+                case 'input':
+                    initialData[component.name] = settings.defaultValue || ''
+                    break
+                case 'textarea':
+                    initialData[component.name] = settings.defaultValue || ''
+                    break
+                case 'integer':
+                    initialData[component.name] = settings.defaultValue ?? null
+                    break
+                case 'float4':
+                    initialData[component.name] = settings.defaultValue ?? null
+                    break
+                case 'float8':
+                    initialData[component.name] = settings.defaultValue ?? null
+                    break
+                case 'date':
+                    initialData[component.name] = settings.defaultValue || null
+                    break
+                default:
+                    initialData[component.name] = null
+            }
+        })
+        return initialData
+    }, [isEditMode, entityData, definition.layout.components])
+
+    const [formData, setFormData] = useState<Record<string, unknown>>(initialFormData)
+    const [errors, setErrors] = useState<Record<string, string>>({})
+    const [hasChanges, setHasChanges] = useState(false)
 
     const saveMutation = useMutation({
         mutationFn: async () => {
-            console.log(formData)
             if (isTransitionMode) {
                 return entitiesApi.transitionEntity(entity.entity_class, entity.id, {data: formData})
             } else {
@@ -248,10 +244,10 @@ export function EntityForm({entity, definition, onSaveSuccess}: EntityFormProps)
     }
 
     // Loading state for edit mode
-    if (isEditMode && (isLoadingData || !isInitialized)) {
+    if (isEditMode && isLoadingData) {
         return (
             <Card>
-                <CardBody>
+                <CardBody className="!p-0">
                     <div className="flex h-96 items-center justify-center">
                         <div className="flex flex-col items-center gap-4">
                             <Loading size="lg"/>
@@ -267,7 +263,7 @@ export function EntityForm({entity, definition, onSaveSuccess}: EntityFormProps)
     if (isEditMode && dataError) {
         return (
             <Card>
-                <CardBody>
+                <CardBody className="!p-0">
                     <Alert variant="error">
                         Failed to load entity data: {dataError.message}
                     </Alert>
@@ -281,7 +277,7 @@ export function EntityForm({entity, definition, onSaveSuccess}: EntityFormProps)
     return (
         <form onSubmit={handleSubmit}>
             <Card>
-                <CardBody>
+                <CardBody className="!p-0">
                     <div className="flex items-center justify-between">
                         <div>
                             <CardTitle>{definition.name}</CardTitle>

@@ -36,7 +36,7 @@ export function Card({
     const classes = [
         'card',
         'bg-base-100',
-        'shadow-xl',
+        '',
         bordered && 'card-bordered',
         imageFull && 'image-full',
         compact && 'card-compact',

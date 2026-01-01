@@ -61,7 +61,7 @@ export function AddComponentDropdown({dataComponentTypes, onAddComponent}: Props
                 {Object.entries(groupedComponents).map(([category, components]) => (
                     <li key={category}>
                         {/* Category Header */}
-                        <div className="menu-title flex items-center gap-2">
+                        <div className="menu-title flex items-center gap-2 text-sm">
                             <span>{getCategoryIcon(category as DataComponentCategory)}</span>
                             <span>{getCategoryLabel(category as DataComponentCategory)}</span>
                         </div>
@@ -75,10 +75,10 @@ export function AddComponentDropdown({dataComponentTypes, onAddComponent}: Props
                                         className="flex items-start gap-3"
                                     >
                                         <div className="flex-1">
-                                            <div className="font-medium">{component.label}</div>
-                                            <div className="text-xs text-base-content/60">
-                                                {component.tooltip}
-                                            </div>
+                                            <div className="font-medium text-xs">{component.label}</div>
+                                            {/*<div className="text-xs text-base-content/60">*/}
+                                            {/*    {component.tooltip}*/}
+                                            {/*</div>*/}
                                         </div>
                                     </button>
                                 </li>

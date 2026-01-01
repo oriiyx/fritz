@@ -59,3 +59,6 @@ database/fritz
 database/generated/queries_*.go
 
 app/core/services/entities/adapters/adapter_*.go
+
+!bin/.gitkeep
+bin/*
