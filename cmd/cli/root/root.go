@@ -12,6 +12,7 @@ import (
 	"github.com/oriiyx/fritz/app/core/utils/env"
 	logger2 "github.com/oriiyx/fritz/app/core/utils/logger"
 	"github.com/oriiyx/fritz/cmd/cli/config"
+	"github.com/oriiyx/fritz/cmd/cli/definitions"
 	"github.com/oriiyx/fritz/cmd/cli/users"
 	"github.com/oriiyx/fritz/cmd/cli/version"
 	db "github.com/oriiyx/fritz/database/generated"
@@ -53,7 +54,7 @@ func newRootCmd(deps *config.Dependencies) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "fritz",
 		Short: "Fritz - Dynamic Data Framework CLI",
-		Long: `Fritz CLI - Command-line interface for managing Fritz PIM system.
+		Long: `Fritz CLI - Command-line interface for managing Fritz system.
 
 Provides tools for user management, database operations, and system administration.
 Use 'fritz [command] --help' for more information about a command.`,
@@ -84,6 +85,7 @@ Use 'fritz [command] --help' for more information about a command.`,
 
 	// Add subcommands with injected dependencies
 	cmd.AddCommand(users.NewUsersCmd(deps))
+	cmd.AddCommand(definitions.NewDefinitionsCmd(deps))
 	cmd.AddCommand(newVersionCmd())
 
 	return cmd
