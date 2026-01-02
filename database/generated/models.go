@@ -8,6 +8,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type DefinitionSchema struct {
+	ID          string             `json:"id"`
+	Name        string             `json:"name"`
+	Description pgtype.Text        `json:"description"`
+	SchemaJson  []byte             `json:"schema_json"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+}
+
 type Entity struct {
 	ID          pgtype.UUID        `json:"id"`
 	EntityClass string             `json:"entity_class"`
