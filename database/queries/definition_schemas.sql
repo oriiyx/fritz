@@ -1,7 +1,7 @@
 -- name: CreateDefinitionSchema :one
 -- noinspection SqlResolve
-INSERT INTO definition_schemas (id, name, description, schema_json)
-VALUES ($1, $2, $3, $4)
+INSERT INTO definition_schemas (id, name, description, schema_json, schema_hash)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
 
 -- name: GetDefinitionSchemaByID :one
@@ -22,6 +22,7 @@ UPDATE definition_schemas
 SET name        = $2,
     description = $3,
     schema_json = $4,
+    schema_hash = $5,
     updated_at  = NOW()
 WHERE id = $1
 RETURNING *;
@@ -48,3 +49,18 @@ LIMIT $1 OFFSET $2;
 -- noinspection SqlResolve
 SELECT COUNT(*)
 FROM definition_schemas;
+
+-- name: GetDefinitionSchemaHash :one
+-- Get only the hash for quick comparison
+-- noinspection SqlResolve
+SELECT schema_hash
+FROM definition_schemas
+WHERE id = $1;
+
+-- name: GetDefinitionSchemasWithDifferentHash :many
+-- Find all schemas where hash doesn't match (for bulk load operations)
+-- noinspection SqlResolve
+SELECT id, name, schema_hash
+FROM definition_schemas
+WHERE id = ANY ($1::text[])
+  AND schema_hash != ANY ($2::text[]);

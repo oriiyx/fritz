@@ -13,6 +13,7 @@ type DefinitionSchema struct {
 	Name        string             `json:"name"`
 	Description pgtype.Text        `json:"description"`
 	SchemaJson  []byte             `json:"schema_json"`
+	SchemaHash  string             `json:"schema_hash"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }

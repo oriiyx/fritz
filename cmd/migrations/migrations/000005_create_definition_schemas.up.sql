@@ -1,9 +1,11 @@
+-- Definition schemas table - stores entity definition configurations
 CREATE TABLE IF NOT EXISTS definition_schemas
 (
-    id          TEXT PRIMARY KEY,                 -- The definition ID from JSON (e.g., 'product', 'customer')
-    name        TEXT        NOT NULL,             -- Human-readable name
-    description TEXT,                             -- Optional description
-    schema_json JSONB       NOT NULL,             -- The complete definition schema as JSON
+    id          TEXT PRIMARY KEY,     -- The definition ID from JSON (e.g., 'product', 'customer')
+    name        TEXT        NOT NULL, -- Human-readable name
+    description TEXT,                 -- Optional description
+    schema_json JSONB       NOT NULL, -- The complete definition schema as JSON
+    schema_hash TEXT        NOT NULL, -- SHA256 hash of schema for quick change detection
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
@@ -16,3 +18,6 @@ CREATE INDEX IF NOT EXISTS idx_definition_schemas_json ON definition_schemas USI
 
 -- Index for updated_at for efficient sorting/filtering
 CREATE INDEX IF NOT EXISTS idx_definition_schemas_updated_at ON definition_schemas (updated_at DESC);
+
+-- Index for hash lookups
+CREATE INDEX IF NOT EXISTS idx_definition_schemas_hash ON definition_schemas (schema_hash);

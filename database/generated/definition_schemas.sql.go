@@ -25,9 +25,9 @@ func (q *Queries) CountDefinitionSchemas(ctx context.Context) (int64, error) {
 }
 
 const createDefinitionSchema = `-- name: CreateDefinitionSchema :one
-INSERT INTO definition_schemas (id, name, description, schema_json)
-VALUES ($1, $2, $3, $4)
-RETURNING id, name, description, schema_json, created_at, updated_at
+INSERT INTO definition_schemas (id, name, description, schema_json, schema_hash)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, name, description, schema_json, schema_hash, created_at, updated_at
 `
 
 type CreateDefinitionSchemaParams struct {
@@ -35,6 +35,7 @@ type CreateDefinitionSchemaParams struct {
 	Name        string      `json:"name"`
 	Description pgtype.Text `json:"description"`
 	SchemaJson  []byte      `json:"schema_json"`
+	SchemaHash  string      `json:"schema_hash"`
 }
 
 // noinspection SqlResolve
@@ -44,6 +45,7 @@ func (q *Queries) CreateDefinitionSchema(ctx context.Context, arg CreateDefiniti
 		arg.Name,
 		arg.Description,
 		arg.SchemaJson,
+		arg.SchemaHash,
 	)
 	var i DefinitionSchema
 	err := row.Scan(
@@ -51,6 +53,7 @@ func (q *Queries) CreateDefinitionSchema(ctx context.Context, arg CreateDefiniti
 		&i.Name,
 		&i.Description,
 		&i.SchemaJson,
+		&i.SchemaHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -82,7 +85,7 @@ func (q *Queries) DeleteDefinitionSchema(ctx context.Context, id string) error {
 }
 
 const getAllDefinitionSchemas = `-- name: GetAllDefinitionSchemas :many
-SELECT id, name, description, schema_json, created_at, updated_at
+SELECT id, name, description, schema_json, schema_hash, created_at, updated_at
 FROM definition_schemas
 ORDER BY name ASC
 `
@@ -102,6 +105,7 @@ func (q *Queries) GetAllDefinitionSchemas(ctx context.Context) ([]DefinitionSche
 			&i.Name,
 			&i.Description,
 			&i.SchemaJson,
+			&i.SchemaHash,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -116,7 +120,7 @@ func (q *Queries) GetAllDefinitionSchemas(ctx context.Context) ([]DefinitionSche
 }
 
 const getDefinitionSchemaByID = `-- name: GetDefinitionSchemaByID :one
-SELECT id, name, description, schema_json, created_at, updated_at
+SELECT id, name, description, schema_json, schema_hash, created_at, updated_at
 FROM definition_schemas
 WHERE id = $1
 `
@@ -130,14 +134,30 @@ func (q *Queries) GetDefinitionSchemaByID(ctx context.Context, id string) (Defin
 		&i.Name,
 		&i.Description,
 		&i.SchemaJson,
+		&i.SchemaHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
+const getDefinitionSchemaHash = `-- name: GetDefinitionSchemaHash :one
+SELECT schema_hash
+FROM definition_schemas
+WHERE id = $1
+`
+
+// Get only the hash for quick comparison
+// noinspection SqlResolve
+func (q *Queries) GetDefinitionSchemaHash(ctx context.Context, id string) (string, error) {
+	row := q.db.QueryRow(ctx, getDefinitionSchemaHash, id)
+	var schema_hash string
+	err := row.Scan(&schema_hash)
+	return schema_hash, err
+}
+
 const getDefinitionSchemasByUpdatedDate = `-- name: GetDefinitionSchemasByUpdatedDate :many
-SELECT id, name, description, schema_json, created_at, updated_at
+SELECT id, name, description, schema_json, schema_hash, created_at, updated_at
 FROM definition_schemas
 ORDER BY updated_at DESC
 LIMIT $1 OFFSET $2
@@ -164,9 +184,50 @@ func (q *Queries) GetDefinitionSchemasByUpdatedDate(ctx context.Context, arg Get
 			&i.Name,
 			&i.Description,
 			&i.SchemaJson,
+			&i.SchemaHash,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getDefinitionSchemasWithDifferentHash = `-- name: GetDefinitionSchemasWithDifferentHash :many
+SELECT id, name, schema_hash
+FROM definition_schemas
+WHERE id = ANY ($1::text[])
+  AND schema_hash != ANY ($2::text[])
+`
+
+type GetDefinitionSchemasWithDifferentHashParams struct {
+	Column1 []string `json:"column_1"`
+	Column2 []string `json:"column_2"`
+}
+
+type GetDefinitionSchemasWithDifferentHashRow struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	SchemaHash string `json:"schema_hash"`
+}
+
+// Find all schemas where hash doesn't match (for bulk load operations)
+// noinspection SqlResolve
+func (q *Queries) GetDefinitionSchemasWithDifferentHash(ctx context.Context, arg GetDefinitionSchemasWithDifferentHashParams) ([]GetDefinitionSchemasWithDifferentHashRow, error) {
+	rows, err := q.db.Query(ctx, getDefinitionSchemasWithDifferentHash, arg.Column1, arg.Column2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetDefinitionSchemasWithDifferentHashRow{}
+	for rows.Next() {
+		var i GetDefinitionSchemasWithDifferentHashRow
+		if err := rows.Scan(&i.ID, &i.Name, &i.SchemaHash); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -182,9 +243,10 @@ UPDATE definition_schemas
 SET name        = $2,
     description = $3,
     schema_json = $4,
+    schema_hash = $5,
     updated_at  = NOW()
 WHERE id = $1
-RETURNING id, name, description, schema_json, created_at, updated_at
+RETURNING id, name, description, schema_json, schema_hash, created_at, updated_at
 `
 
 type UpdateDefinitionSchemaParams struct {
@@ -192,6 +254,7 @@ type UpdateDefinitionSchemaParams struct {
 	Name        string      `json:"name"`
 	Description pgtype.Text `json:"description"`
 	SchemaJson  []byte      `json:"schema_json"`
+	SchemaHash  string      `json:"schema_hash"`
 }
 
 // noinspection SqlResolve
@@ -201,6 +264,7 @@ func (q *Queries) UpdateDefinitionSchema(ctx context.Context, arg UpdateDefiniti
 		arg.Name,
 		arg.Description,
 		arg.SchemaJson,
+		arg.SchemaHash,
 	)
 	var i DefinitionSchema
 	err := row.Scan(
@@ -208,6 +272,7 @@ func (q *Queries) UpdateDefinitionSchema(ctx context.Context, arg UpdateDefiniti
 		&i.Name,
 		&i.Description,
 		&i.SchemaJson,
+		&i.SchemaHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
