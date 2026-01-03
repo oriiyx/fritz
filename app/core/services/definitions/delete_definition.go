@@ -109,6 +109,17 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 9. Delete entry from the definition_schema table
+	err = h.Queries.DeleteDefinitionSchema(r.Context(), definition.ID)
+	if err != nil {
+		h.Logger.Error().
+			Err(err).
+			Str(l.KeyReqID, reqID).Str("definition_id", ID).
+			Msg("Failed to delete definition schema from the table")
+		errhandler.ServerError(w, errhandler.RespDBDataRemoveFailure)
+		return
+	}
+
 	h.Logger.Info().
 		Str("entity_id", definition.ID).
 		Msg("SQLC generation completed successfully")

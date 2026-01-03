@@ -4,13 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/oriiyx/fritz/app/core/api/base"
 	"github.com/oriiyx/fritz/app/core/api/common/errhandler"
 	l "github.com/oriiyx/fritz/app/core/api/common/log"
 	"github.com/oriiyx/fritz/app/core/services/objects/definition_builder"
 	"github.com/oriiyx/fritz/app/core/services/objects/definitions"
 	ctxUtil "github.com/oriiyx/fritz/app/core/utils/ctx"
+	helpers "github.com/oriiyx/fritz/app/core/utils/helpers/schema"
 	validatorUtil "github.com/oriiyx/fritz/app/core/utils/validator"
+	db "github.com/oriiyx/fritz/database/generated"
 )
 
 type Handler struct {
@@ -81,6 +84,36 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	err = h.entityBuilder.CreateCrudOperations(tablename, &req)
 	if err != nil {
 		h.Logger.Error().Err(err).Interface("definition", req).Msg("Failed to create crud operations")
+		errhandler.ServerError(w, errhandler.RespDBDataInsertFailure)
+		return
+	}
+
+	hash, err := helpers.CalculateSchemaHash(&req)
+	if err != nil {
+		h.Logger.Error().Err(err).Interface("definition", req).Msg("Failed to calculate hash for the definition schema")
+		errhandler.ServerError(w, errhandler.RespProcessFailure)
+		return
+	}
+
+	jsonBytes, err := json.Marshal(req)
+	if err != nil {
+		h.Logger.Error().Err(err).Interface("definition", req).Msg("Failed to json marshal definition schema")
+		errhandler.ServerError(w, errhandler.RespJSONEncodeFailure)
+		return
+	}
+
+	_, err = h.Queries.CreateDefinitionSchema(r.Context(), db.CreateDefinitionSchemaParams{
+		ID:   req.ID,
+		Name: req.Name,
+		Description: pgtype.Text{
+			String: req.Description,
+			Valid:  req.Description != "",
+		},
+		SchemaJson: jsonBytes,
+		SchemaHash: hash,
+	})
+	if err != nil {
+		h.Logger.Error().Err(err).Interface("definition", req).Msg("Failed to create definition schema entry")
 		errhandler.ServerError(w, errhandler.RespDBDataInsertFailure)
 		return
 	}
