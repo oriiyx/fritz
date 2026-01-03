@@ -96,15 +96,15 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 8. Run sqlc users
-	cmd := exec.Command("sqlc", "users")
+	// 8. Run sqlc generate
+	cmd := exec.Command("sqlc", "generate")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		h.Logger.Error().
 			Err(err).
 			Str(l.KeyReqID, reqID).Str("definition_id", ID).
 			Str("output", string(output)).
-			Msg("SQLC users failed while trying to delete the definition")
+			Msg("SQLC generate failed while trying to delete the definition")
 		errhandler.ServerError(w, errhandler.RespDBDataRemoveFailure)
 		return
 	}
